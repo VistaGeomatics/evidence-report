@@ -339,7 +339,8 @@
   <div class="container">
     <div class="header-bar">
       <div class="header-left">
-        <h1><span class="vista-bold">VISTA</</span><span class="geomatics-regular">GEOMATICS</span></h1>
+        <!-- No space visually between VISTA and GEOMATICS -->
+        <h1><span class="vista-bold">VISTA</span><span class="geomatics-regular">GEOMATICS</span></h1>
         <p>Evidence Report</p>
       </div>
       <img src="vista-geomatics.png" class="header-logo" alt="Vista Geomatics Logo">
@@ -727,7 +728,7 @@
     return canvas.toDataURL('image/jpeg', quality);
   }
 
-  /* ----- DOWNLOAD PDF: report pages + big photo pages ----- */
+  /* ----- DOWNLOAD PDF: report pages + photo appendix (4 per page) ----- */
   if (downloadBtn) {
     downloadBtn.addEventListener('click', async () => {
       const container = document.querySelector('.container');
@@ -770,12 +771,12 @@
         pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
       }
 
-      // Restore layout
+      // Restore normal layout
       allPages.forEach((page, idx) => {
         page.style.display = originalDisplays[idx];
       });
 
-      // 2) LARGE PHOTO PAGES
+      // 2) LARGE PHOTO PAGES – 4 per page with descriptions
       const photoImgs = Array.from(document.querySelectorAll('.photo-grid img'));
       if (photoImgs.length > 0) {
         const pdfWidth  = pdf.internal.pageSize.getWidth();
@@ -784,30 +785,72 @@
         const availW    = pdfWidth  - margin * 2;
         const availH    = pdfHeight - margin * 2;
 
-        photoImgs.forEach((img, index) => {
-          pdf.addPage();
-          // optional: caption header for each photo page
-          const caption = img.alt ? img.alt : `Evidence Photo ${index + 1}`;
-          pdf.setFontSize(12);
-          pdf.text(caption, margin, margin - 2); // small caption near top
-
-          const dataUrl = getScaledImageDataURL(img, 1400, 0.75);
-
-          // Make a dummy Image to get pixel dims after scaling
-          const tmpImg = new Image();
-          tmpImg.src = dataUrl;
-          const iw = tmpImg.width  || img.width  || 800;
-          const ih = tmpImg.height || img.height || 600;
-
-          const scale = Math.min(availW / iw, (availH - 8) / ih); // -8 to leave room for caption
-          const drawW = iw * scale;
-          const drawH = ih * scale;
-
-          const x = margin + (availW - drawW) / 2;
-          const y = margin + 4 + (availH - drawH) / 2;
-
-          pdf.addImage(dataUrl, 'JPEG', x, y, drawW, drawH);
+        // Build array of { img, desc }
+        const photos = photoImgs.map((img, idx) => {
+          const card = img.closest('.photo-card');
+          let desc = "";
+          if (card) {
+            const textarea = card.querySelector('textarea');
+            if (textarea && textarea.value.trim() !== "") {
+              desc = textarea.value.trim();
+            }
+          }
+          if (!desc) desc = `Photo ${idx + 1}`;
+          return { img, desc };
         });
+
+        const perPage = 4; // 4 photos per appendix page
+        const cols = 2;
+        const rows = 2;
+        const cellW = availW / cols;
+        const cellH = availH / rows;
+        const captionHeight = 6; // mm reserved for text under each photo
+
+        for (let i = 0; i < photos.length; i += perPage) {
+          const pagePhotos = photos.slice(i, i + perPage);
+          pdf.addPage();
+
+          // Optional page title
+          pdf.setFontSize(12);
+          pdf.text('Evidence Photos', margin, margin - 2);
+
+          pagePhotos.forEach((p, idxOnPage) => {
+            const col = idxOnPage % cols;
+            const row = Math.floor(idxOnPage / cols);
+
+            const cellX = margin + col * cellW;
+            const cellY = margin + row * cellH;
+
+            const dataUrl = getScaledImageDataURL(p.img, 1400, 0.75);
+
+            // Use a temp image object to get dimensions
+            const tempImg = new Image();
+            tempImg.src = dataUrl;
+            const iw = tempImg.width  || p.img.width  || 800;
+            const ih = tempImg.height || p.img.height || 600;
+
+            // Space for image inside cell (leaving a bit of room for caption text)
+            const imgAvailH = cellH - captionHeight - 2;
+            const scale     = Math.min((cellW - 4) / iw, imgAvailH / ih);
+            const drawW     = iw * scale;
+            const drawH     = ih * scale;
+
+            const imgX = cellX + (cellW - drawW) / 2;
+            const imgY = cellY + 2; // inset from top of cell
+
+            pdf.addImage(dataUrl, 'JPEG', imgX, imgY, drawW, drawH);
+
+            // Caption under the photo
+            pdf.setFontSize(9);
+            const captionY = imgY + drawH + 3;
+            const captionX = cellX + 2;
+            const maxCaptionWidth = cellW - 4;
+
+            pdf.text(p.desc, captionX, captionY, {
+              maxWidth: maxCaptionWidth
+            });
+          });
+        }
       }
 
       pdf.save('EvidenceReport.pdf');
