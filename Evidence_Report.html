@@ -89,7 +89,7 @@
     .form-page {
       position: relative;
       z-index: 1;
-      padding: 24px 24px 32px;
+      padding: 20px 24px 28px;
       page-break-after: always;
       page-break-inside: avoid;
     }
@@ -100,10 +100,10 @@
 
     .page-title {
       font-family: "Montserrat", sans-serif;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: 700;
       text-align: center;
-      margin: 8px 0 18px;
+      margin: 6px 0 14px;
       color: var(--vista-blue-dark);
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -111,12 +111,12 @@
 
     /* SECTIONS */
     .section {
-      margin: 16px 0;
-      padding: 18px 20px 20px;
+      margin: 12px 0;
+      padding: 14px 16px 16px;
       border-radius: 14px;
       border: 1px solid var(--border-soft);
       background: linear-gradient(135deg, #fbfdff 0%, #f4f8fd 60%, #eff5fb 100%);
-      box-shadow: 0 10px 24px rgba(5, 41, 66, 0.05);
+      box-shadow: 0 8px 20px rgba(5, 41, 66, 0.05);
       position: relative;
     }
 
@@ -124,28 +124,28 @@
       content: "";
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 4px;
+      height: 3px;
       background: linear-gradient(90deg, var(--vista-blue-light), var(--vista-blue-dark));
     }
 
     .section-title {
       font-weight: 600;
-      font-size: 1.02rem;
+      font-size: 1.0rem;
       color: var(--vista-blue-dark);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .section-subtext {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     label {
-      font-size: 0.84rem;
+      font-size: 0.82rem;
       font-weight: 600;
       display: block;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     input[type="text"],
@@ -153,10 +153,10 @@
     textarea,
     select {
       width: 100%;
-      padding: 7px 9px;
-      font-size: 0.9rem;
+      padding: 6px 8px;
+      font-size: 0.86rem;
       border: 1px solid var(--border-soft);
-      border-radius: 9px;
+      border-radius: 8px;
       background: #f9fbff;
       transition: 0.15s;
     }
@@ -167,36 +167,36 @@
       outline: none;
       border-color: var(--vista-blue-light);
       background: #fff;
-      box-shadow: 0 0 0 3px rgba(38,132,168,0.22);
+      box-shadow: 0 0 0 2px rgba(38,132,168,0.22);
     }
 
     textarea {
-      min-height: 80px;
+      min-height: 70px;
       resize: vertical;
     }
 
     .grid-2 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
     }
 
     .grid-3 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
     }
 
     /* TABLES */
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.84rem;
+      font-size: 0.82rem;
     }
 
     th, td {
       border: 1px solid #c6d4e5;
-      padding: 6px 8px;
+      padding: 5px 6px;
       text-align: left;
     }
 
@@ -206,9 +206,9 @@
     }
 
     .table-note {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
-      margin-top: 4px;
+      margin-top: 3px;
     }
 
     /* BUTTONS */
@@ -216,13 +216,13 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: flex-end;
-      gap: 10px;
-      margin-top: 18px;
+      gap: 8px;
+      margin-top: 14px;
     }
 
     button {
-      padding: 9px 18px;
-      font-size: 0.88rem;
+      padding: 7px 16px;
+      font-size: 0.82rem;
       border-radius: 999px;
       border: none;
       cursor: pointer;
@@ -238,7 +238,7 @@
     .btn-primary {
       background: linear-gradient(120deg, var(--vista-blue-light), var(--vista-blue), var(--vista-blue-dark));
       color: #fff;
-      box-shadow: 0 10px 24px rgba(5, 41, 66, 0.35);
+      box-shadow: 0 8px 18px rgba(5, 41, 66, 0.3);
     }
 
     .btn-secondary {
@@ -258,53 +258,53 @@
     }
 
     /* PHOTO UPLOAD */
-    .photo-upload { margin-top: 10px; }
+    .photo-upload { margin-top: 8px; }
 
     .photo-grid {
-      margin-top: 10px;
+      margin-top: 8px;
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      max-height: 260px;
+      gap: 8px;
+      max-height: 220px;
       overflow-y: auto;
-      padding-right: 4px;
+      padding-right: 3px;
     }
 
     .photo-card {
       border: 1px solid #c6d4e5;
-      border-radius: 10px;
-      padding: 6px;
-      width: 150px;
+      border-radius: 9px;
+      padding: 5px;
+      width: 135px;
       background: #f7fbff;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
       flex-shrink: 0;
     }
 
     .photo-card img {
       width: 100%;
-      height: 100px;
-      border-radius: 7px;
+      height: 90px;
+      border-radius: 6px;
       object-fit: cover;
       border: 1px solid #d4dfe9;
       background: #e5edf7;
     }
 
     .photo-card textarea {
-      font-size: 0.78rem;
-      min-height: 48px;
+      font-size: 0.76rem;
+      min-height: 40px;
       resize: vertical;
     }
 
     .inline-labels {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 8px;
     }
 
-    .mt-10 { margin-top: 10px; }
-    .mt-14 { margin-top: 14px; }
+    .mt-10 { margin-top: 8px; }
+    .mt-14 { margin-top: 10px; }
 
     @media print {
       body {
@@ -546,7 +546,7 @@
 
         <div class="section">
           <div class="section-title">Evidence Photos</div>
-          <div class="section-subtext">Attach images related to this evidence. Thumbnails are kept compact so they do not push other content off the page.</div>
+          <div class="section-subtext">Attach images related to this evidence. Thumbnails are compact so they don’t push other content off the page too much.</div>
           <div class="photo-upload">
             <button type="button" class="btn-secondary add-photo-btn">+ Add Photo</button>
             <input type="file" class="photo-input" accept="image/*" multiple style="display:none;">
@@ -562,8 +562,9 @@
   </div>
 </div>
 
-<!-- html2pdf bundle (includes html2canvas + jsPDF) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- jsPDF and html2canvas (no html2pdf bundle) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
 (function () {
@@ -673,6 +674,7 @@
                 <td><input type="text" name="prox_dist_extra_${i+1}"></td>
                 <td><input type="text" name="prox_dir_extra_${i+1}"></td>
                 <td><input type="text" name="prox_obj_extra_${i+1}"></td>
+
               </tr>`).join("")}
           </tbody>
         </table>
@@ -707,7 +709,7 @@
     });
   }
 
-  /* ----- DOWNLOAD PDF: one page per .form-page, scaled to fit ----- */
+  /* ----- DOWNLOAD PDF: one PDF page per .form-page, scaled to fit ----- */
   if (downloadBtn) {
     downloadBtn.addEventListener('click', async () => {
       const container = document.querySelector('.container');
@@ -720,7 +722,7 @@
       let first = true;
 
       for (let i = 0; i < allPages.length; i++) {
-        // Show only this logical page (with header)
+        // show only one logical page (with header) at a time
         allPages.forEach((page, idx) => {
           page.style.display = (idx === i) ? 'block' : 'none';
         });
@@ -734,7 +736,6 @@
         const pdfWidth  = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
 
-        // Fit entire canvas into the PDF page (no clipping)
         let imgWidth  = canvas.width;
         let imgHeight = canvas.height;
         const scale   = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
@@ -751,7 +752,7 @@
         pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
       }
 
-      // Restore original layout
+      // restore layout
       allPages.forEach((page, idx) => {
         page.style.display = originalDisplays[idx];
       });
