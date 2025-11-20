@@ -314,7 +314,7 @@
     .mt-10 { margin-top: 10px; }
     .mt-14 { margin-top: 14px; }
 
-    /* PRINT STYLES (for browser print if someone uses Ctrl+P) */
+    /* PRINT STYLES */
     @media print {
       body {
         background: #ffffff;
@@ -355,9 +355,9 @@
       <div class="header-left">
         <!-- No space between VISTA and GEOMATICS -->
         <h1><span class="vista-bold">VISTA</span><span class="geomatics-regular">GEOMATICS</span></h1>
-        <p>Evidence Report – RPR</p>
+        <!-- Subtitle now just "Evidence Report" -->
+        <p>Evidence Report</p>
       </div>
-      <!-- Logo file should be in the same folder as this HTML -->
       <img src="vista-geomatics.png" class="header-logo" alt="Vista Geomatics Logo">
     </div>
 
@@ -554,66 +554,12 @@
               </tr>
             </thead>
             <tbody>
+              <!-- 15 rows -->
+              ${Array.from({length: 15}).map((_, i) => `
               <tr>
-                <td><input type="text" name="pt_no_1"></td>
-                <td><input type="text" name="pt_desc_1"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_2"></td>
-                <td><input type="text" name="pt_desc_2"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_3"></td>
-                <td><input type="text" name="pt_desc_3"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_4"></td>
-                <td><input type="text" name="pt_desc_4"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_5"></td>
-                <td><input type="text" name="pt_desc_5"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_6"></td>
-                <td><input type="text" name="pt_desc_6"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_7"></td>
-                <td><input type="text" name="pt_desc_7"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_8"></td>
-                <td><input type="text" name="pt_desc_8"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_9"></td>
-                <td><input type="text" name="pt_desc_9"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_10"></td>
-                <td><input type="text" name="pt_desc_10"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_11"></td>
-                <td><input type="text" name="pt_desc_11"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_12"></td>
-                <td><input type="text" name="pt_desc_12"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_13"></td>
-                <td><input type="text" name="pt_desc_13"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_14"></td>
-                <td><input type="text" name="pt_desc_14"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="pt_no_15"></td>
-                <td><input type="text" name="pt_desc_15"></td>
-              </tr>
+                <td><input type="text" name="pt_no_${i+1}"></td>
+                <td><input type="text" name="pt_desc_${i+1}"></td>
+              </tr>`).join('')}
             </tbody>
           </table>
           <div class="table-note">
@@ -681,31 +627,12 @@
               </tr>
             </thead>
             <tbody>
+              ${Array.from({length: 5}).map((_, i) => `
               <tr>
-                <td><input type="text" name="prox_dist_1"></td>
-                <td><input type="text" name="prox_dir_1"></td>
-                <td><input type="text" name="prox_obj_1"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="prox_dist_2"></td>
-                <td><input type="text" name="prox_dir_2"></td>
-                <td><input type="text" name="prox_obj_2"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="prox_dist_3"></td>
-                <td><input type="text" name="prox_dir_3"></td>
-                <td><input type="text" name="prox_obj_3"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="prox_dist_4"></td>
-                <td><input type="text" name="prox_dir_4"></td>
-                <td><input type="text" name="prox_obj_4"></td>
-              </tr>
-              <tr>
-                <td><input type="text" name="prox_dist_5"></td>
-                <td><input type="text" name="prox_dir_5"></td>
-                <td><input type="text" name="prox_obj_5"></td>
-              </tr>
+                <td><input type="text" name="prox_dist_${i+1}"></td>
+                <td><input type="text" name="prox_dir_${i+1}"></td>
+                <td><input type="text" name="prox_obj_${i+1}"></td>
+              </tr>`).join('')}
             </tbody>
           </table>
         </div>
@@ -732,7 +659,7 @@
   </div>
 </div>
 
-<!-- html2pdf bundle (includes html2canvas + jsPDF) -->
+<!-- html2pdf bundle (includes html2canvas + jsPDF internally) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
@@ -788,7 +715,7 @@
 
     // Initialize the original Evidence page
     const initialEvidencePage = document.getElementById('evidencePage');
-    initEvidencePage(initialEvidencePage);
+    if (initialEvidencePage) initEvidencePage(initialEvidencePage);
 
     /* ---------- Templates for Extra Pages ---------- */
 
@@ -823,10 +750,10 @@
             </thead>
             <tbody>
               ${Array.from({length: 15}).map((_, i) => `
-                <tr>
-                  <td><input type="text" name="pt_no_extra_${i+1}"></td>
-                  <td><input type="text" name="pt_desc_extra_${i+1}"></td>
-                </tr>`).join('')}
+              <tr>
+                <td><input type="text" name="pt_no_extra_${i+1}"></td>
+                <td><input type="text" name="pt_desc_extra_${i+1}"></td>
+              </tr>`).join('')}
             </tbody>
           </table>
         </div>
@@ -887,11 +814,11 @@
             </thead>
             <tbody>
               ${Array.from({length: 5}).map((_, i) => `
-                <tr>
-                  <td><input type="text" name="prox_dist_extra_${i+1}"></td>
-                  <td><input type="text" name="prox_dir_extra_${i+1}"></td>
-                  <td><input type="text" name="prox_obj_extra_${i+1}"></td>
-                </tr>`).join('')}
+              <tr>
+                <td><input type="text" name="prox_dist_extra_${i+1}"></td>
+                <td><input type="text" name="prox_dir_extra_${i+1}"></td>
+                <td><input type="text" name="prox_obj_extra_${i+1}"></td>
+              </tr>`).join('')}
             </tbody>
           </table>
         </div>
@@ -916,71 +843,50 @@
       wrapper.innerHTML = template.trim();
       const pageEl = wrapper.firstElementChild;
       extraPages.appendChild(pageEl);
-      if (isEvidence) {
-        initEvidencePage(pageEl);
-      }
+      if (isEvidence) initEvidencePage(pageEl);
     }
 
     /* ---------- Add page buttons ---------- */
-    addTraverseBtn.addEventListener('click', function () {
-      addPage(traverseTemplate, false);
-    });
+    if (addTraverseBtn) {
+      addTraverseBtn.addEventListener('click', function () {
+        addPage(traverseTemplate, false);
+      });
+    }
 
-    addEvidenceBtn.addEventListener('click', function () {
-      addPage(evidenceTemplate, true);
-    });
+    if (addEvidenceBtn) {
+      addEvidenceBtn.addEventListener('click', function () {
+        addPage(evidenceTemplate, true);
+      });
+    }
 
     /* ---------- Reset form ---------- */
-    resetBtn.addEventListener('click', function () {
-      form.reset();
-      extraPages.innerHTML = "";
-      document.querySelectorAll('.photo-grid').forEach(function (grid) {
-        grid.innerHTML = "";
-      });
-    });
-
-    /* ---------- PDF EXPORT: one PDF page per .form-page ---------- */
-    downloadBtn.addEventListener('click', async function () {
-      const container = document.querySelector('.container');
-      const allPages = Array.from(document.querySelectorAll('.form-page'));
-      const originalDisplays = allPages.map(p => p.style.display || "");
-
-      // jsPDF is bundled inside html2pdf.bundle
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('p', 'mm', 'letter');
-
-      let first = true;
-
-      for (let i = 0; i < allPages.length; i++) {
-        // Show only one logical page at a time (header + that page)
-        allPages.forEach((page, idx) => {
-          page.style.display = (idx === i) ? 'block' : 'none';
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        form.reset();
+        extraPages.innerHTML = "";
+        document.querySelectorAll('.photo-grid').forEach(function (grid) {
+          grid.innerHTML = "";
         });
-
-        const canvas = await html2canvas(container, {
-          scale: 2,
-          useCORS: true
-        });
-
-        const imgData = canvas.toDataURL('image/jpeg', 0.98);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const imgHeight = canvas.height * pdfWidth / canvas.width;
-
-        if (!first) {
-          pdf.addPage();
-        }
-        first = false;
-
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, imgHeight);
-      }
-
-      // Restore original display states
-      allPages.forEach((page, idx) => {
-        page.style.display = originalDisplays[idx];
       });
+    }
 
-      pdf.save('EvidenceReport.pdf');
-    });
+    /* ---------- PDF EXPORT (html2pdf, one page per .form-page) ---------- */
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', function () {
+        const element = document.querySelector('.container');
+
+        const opt = {
+          margin: 10,
+          filename: 'EvidenceReport.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'], before: '.form-page' }
+        };
+
+        html2pdf().set(opt).from(element).save();
+      });
+    }
   })();
 </script>
 </body>
