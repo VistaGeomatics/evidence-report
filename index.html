@@ -314,7 +314,7 @@
     .mt-10 { margin-top: 10px; }
     .mt-14 { margin-top: 14px; }
 
-    /* PRINT STYLES (for browser print if needed) */
+    /* PRINT STYLES (for browser print if someone uses Ctrl+P) */
     @media print {
       body {
         background: #ffffff;
@@ -353,6 +353,7 @@
   <div class="container">
     <div class="header-bar">
       <div class="header-left">
+        <!-- No space between VISTA and GEOMATICS -->
         <h1><span class="vista-bold">VISTA</span><span class="geomatics-regular">GEOMATICS</span></h1>
         <p>Evidence Report – RPR</p>
       </div>
@@ -951,7 +952,7 @@
       let first = true;
 
       for (let i = 0; i < allPages.length; i++) {
-        // Show only one logical page at a time (keeps header + that page)
+        // Show only one logical page at a time (header + that page)
         allPages.forEach((page, idx) => {
           page.style.display = (idx === i) ? 'block' : 'none';
         });
@@ -963,8 +964,6 @@
 
         const imgData = canvas.toDataURL('image/jpeg', 0.98);
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = pdfWidth;
         const imgHeight = canvas.height * pdfWidth / canvas.width;
 
         if (!first) {
@@ -972,7 +971,7 @@
         }
         first = false;
 
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, imgHeight);
       }
 
       // Restore original display states
