@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
 
   <style>
-    /* COLOR + THEME VARIABLES (Vista style) */
     :root {
       --vista-blue: #165f7d;
       --vista-blue-light: #2a7fa3;
@@ -21,9 +20,7 @@
       --text-muted: #6b7280;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: "Inter", sans-serif;
@@ -46,7 +43,6 @@
       position: relative;
     }
 
-    /* DECOR TOP GLOW */
     .container::before {
       content: "";
       position: absolute;
@@ -75,7 +71,6 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
     }
-
     .vista-bold { font-weight: 700; }
     .geomatics-regular { font-weight: 400; }
 
@@ -114,7 +109,7 @@
       text-transform: uppercase;
     }
 
-    /* SECTION CARDS */
+    /* SECTIONS */
     .section {
       margin: 16px 0;
       padding: 18px 20px 20px;
@@ -262,10 +257,8 @@
       justify-content: flex-start;
     }
 
-    /* PHOTO UPLOAD AREA */
-    .photo-upload {
-      margin-top: 10px;
-    }
+    /* PHOTO UPLOAD */
+    .photo-upload { margin-top: 10px; }
 
     .photo-grid {
       margin-top: 10px;
@@ -304,7 +297,6 @@
       resize: vertical;
     }
 
-    /* SMALL UTILS */
     .inline-labels {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -314,32 +306,26 @@
     .mt-10 { margin-top: 10px; }
     .mt-14 { margin-top: 14px; }
 
-    /* PRINT STYLES */
     @media print {
       body {
         background: #ffffff;
         padding: 0;
       }
-
       .page-wrap {
         max-width: 100%;
         margin: 0;
       }
-
       .container {
         border-radius: 0;
         box-shadow: none;
       }
-
       .container::before {
         display: none;
       }
-
       .btn-row,
       .btn-row-controls {
         display: none !important;
       }
-
       input,
       textarea,
       select {
@@ -353,69 +339,34 @@
   <div class="container">
     <div class="header-bar">
       <div class="header-left">
-        <!-- No space between VISTA and GEOMATICS -->
         <h1><span class="vista-bold">VISTA</span><span class="geomatics-regular">GEOMATICS</span></h1>
-        <!-- Subtitle now just "Evidence Report" -->
         <p>Evidence Report</p>
       </div>
       <img src="vista-geomatics.png" class="header-logo" alt="Vista Geomatics Logo">
     </div>
 
     <form id="evidenceForm">
-      <!-- ================= PAGE 1 – TITLE PAGE ================= -->
+      <!-- ========== PAGE 1 – TITLE PAGE ========== -->
       <div class="form-page" id="titlePage">
         <div class="page-title">Title Page</div>
 
         <div class="section">
           <div class="section-title">Job Details</div>
           <div class="grid-2">
-            <div>
-              <label>Job No.</label>
-              <input type="text" name="job_no">
-            </div>
-            <div>
-              <label>Client</label>
-              <input type="text" name="client">
-            </div>
-            <div>
-              <label>Client Contact</label>
-              <input type="text" name="client_contact">
-            </div>
-            <div>
-              <label>Job Description</label>
-              <input type="text" name="job_description">
-            </div>
+            <div><label>Job No.</label><input type="text" name="job_no"></div>
+            <div><label>Client</label><input type="text" name="client"></div>
+            <div><label>Client Contact</label><input type="text" name="client_contact"></div>
+            <div><label>Job Description</label><input type="text" name="job_description"></div>
           </div>
 
           <div class="grid-2 mt-14">
-            <div>
-              <label>Crew Chief</label>
-              <input type="text" name="crew_chief">
-            </div>
-            <div>
-              <label>Assistant</label>
-              <input type="text" name="assistant">
-            </div>
-            <div>
-              <label>Start Date</label>
-              <input type="date" name="start_date">
-            </div>
-            <div>
-              <label>End Date</label>
-              <input type="date" name="end_date">
-            </div>
-            <div>
-              <label>Project Manager</label>
-              <input type="text" name="project_manager">
-            </div>
-            <div>
-              <label>Land Surveyor</label>
-              <input type="text" name="land_surveyor">
-            </div>
-            <div>
-              <label>Location</label>
-              <input type="text" name="location">
-            </div>
+            <div><label>Crew Chief</label><input type="text" name="crew_chief"></div>
+            <div><label>Assistant</label><input type="text" name="assistant"></div>
+            <div><label>Start Date</label><input type="date" name="start_date"></div>
+            <div><label>End Date</label><input type="date" name="end_date"></div>
+            <div><label>Project Manager</label><input type="text" name="project_manager"></div>
+            <div><label>Land Surveyor</label><input type="text" name="land_surveyor"></div>
+            <div><label>Location</label><input type="text" name="location"></div>
           </div>
         </div>
 
@@ -427,7 +378,7 @@
         <div class="section">
           <div class="section-title">Site Conditions and Equipment</div>
           <div class="grid-2">
-            <!-- Meteorological Information -->
+            <!-- Meteorological -->
             <div>
               <div class="section-subtext"><strong>Meteorological Information</strong></div>
               <table>
@@ -466,7 +417,7 @@
               </table>
             </div>
 
-            <!-- Survey Equipment -->
+            <!-- Equipment -->
             <div>
               <div class="section-subtext"><strong>Survey Equipment</strong></div>
               <table>
@@ -499,48 +450,29 @@
           </div>
         </div>
 
-        <!-- CONTROL BUTTONS – bottom of Title Page -->
+        <!-- Controls -->
         <div class="section">
           <div class="section-title">Form Controls</div>
-          <div class="section-subtext">
-            Add extra pages, reset the form, or download as a PDF.
-          </div>
+          <div class="section-subtext">Add extra pages, reset the form, or download as a PDF.</div>
           <div class="btn-row btn-row-controls">
-            <button type="button" id="addTraversePage" class="btn-primary">
-              + Add Traverse Notes / Point List Page
-            </button>
-            <button type="button" id="addEvidencePage" class="btn-primary">
-              + Add Evidence Report Page
-            </button>
-            <button type="button" id="resetForm" class="btn-secondary">
-              Reset Form
-            </button>
-            <button type="button" id="downloadPdf" class="btn-ghost">
-              Download PDF
-            </button>
+            <button type="button" id="addTraversePage" class="btn-primary">+ Add Traverse Notes / Point List Page</button>
+            <button type="button" id="addEvidencePage" class="btn-primary">+ Add Evidence Report Page</button>
+            <button type="button" id="resetForm" class="btn-secondary">Reset Form</button>
+            <button type="button" id="downloadPdf" class="btn-ghost">Download PDF</button>
           </div>
         </div>
       </div>
 
-      <!-- ============= PAGE 2 – TRAVERSE NOTES and POINT LIST ============= -->
+      <!-- ========== PAGE 2 – TRAVERSE NOTES & POINT LIST ========== -->
       <div class="form-page traverse-page">
         <div class="page-title">Traverse Notes and Point List</div>
 
         <div class="section">
           <div class="section-title">Set Up</div>
           <div class="inline-labels">
-            <div>
-              <label>Instrument</label>
-              <input type="text" name="instrument">
-            </div>
-            <div>
-              <label>Setup Point</label>
-              <input type="text" name="setup_point">
-            </div>
-            <div>
-              <label>Backsight Point</label>
-              <input type="text" name="backsight_point">
-            </div>
+            <div><label>Instrument</label><input type="text" name="instrument"></div>
+            <div><label>Setup Point</label><input type="text" name="setup_point"></div>
+            <div><label>Backsight Point</label><input type="text" name="backsight_point"></div>
           </div>
         </div>
 
@@ -548,72 +480,48 @@
           <div class="section-title">Point List for Conventional Survey</div>
           <table>
             <thead>
-              <tr>
-                <th style="width: 25%;">Point No.</th>
-                <th>Description</th>
-              </tr>
+              <tr><th style="width:25%;">Point No.</th><th>Description</th></tr>
             </thead>
             <tbody>
-              <!-- 15 rows -->
-              ${Array.from({length: 15}).map((_, i) => `
-              <tr>
-                <td><input type="text" name="pt_no_${i+1}"></td>
-                <td><input type="text" name="pt_desc_${i+1}"></td>
-              </tr>`).join('')}
+              <tr><td><input type="text" name="pt_no_1"></td><td><input type="text" name="pt_desc_1"></td></tr>
+              <tr><td><input type="text" name="pt_no_2"></td><td><input type="text" name="pt_desc_2"></td></tr>
+              <tr><td><input type="text" name="pt_no_3"></td><td><input type="text" name="pt_desc_3"></td></tr>
+              <tr><td><input type="text" name="pt_no_4"></td><td><input type="text" name="pt_desc_4"></td></tr>
+              <tr><td><input type="text" name="pt_no_5"></td><td><input type="text" name="pt_desc_5"></td></tr>
+              <tr><td><input type="text" name="pt_no_6"></td><td><input type="text" name="pt_desc_6"></td></tr>
+              <tr><td><input type="text" name="pt_no_7"></td><td><input type="text" name="pt_desc_7"></td></tr>
+              <tr><td><input type="text" name="pt_no_8"></td><td><input type="text" name="pt_desc_8"></td></tr>
+              <tr><td><input type="text" name="pt_no_9"></td><td><input type="text" name="pt_desc_9"></td></tr>
+              <tr><td><input type="text" name="pt_no_10"></td><td><input type="text" name="pt_desc_10"></td></tr>
+              <tr><td><input type="text" name="pt_no_11"></td><td><input type="text" name="pt_desc_11"></td></tr>
+              <tr><td><input type="text" name="pt_no_12"></td><td><input type="text" name="pt_desc_12"></td></tr>
+              <tr><td><input type="text" name="pt_no_13"></td><td><input type="text" name="pt_desc_13"></td></tr>
+              <tr><td><input type="text" name="pt_no_14"></td><td><input type="text" name="pt_desc_14"></td></tr>
+              <tr><td><input type="text" name="pt_no_15"></td><td><input type="text" name="pt_desc_15"></td></tr>
             </tbody>
           </table>
-          <div class="table-note">
-            For additional points, use “Add Traverse Notes / Point List Page” on the Title Page.
-          </div>
+          <div class="table-note">For additional points, use “Add Traverse Notes / Point List Page” on the Title Page.</div>
         </div>
       </div>
 
-      <!-- ================= PAGE 3 – EVIDENCE REPORT ================= -->
+      <!-- ========== PAGE 3 – EVIDENCE REPORT ========== -->
       <div class="form-page evidence-page" id="evidencePage">
         <div class="page-title">Evidence Report</div>
 
         <div class="section">
           <div class="section-title">Evidence Details</div>
           <div class="grid-2">
-            <div>
-              <label>Date</label>
-              <input type="date" name="evidence_date">
-            </div>
-            <div>
-              <label>Point Number</label>
-              <input type="text" name="evidence_point_number">
-            </div>
+            <div><label>Date</label><input type="date" name="evidence_date"></div>
+            <div><label>Point Number</label><input type="text" name="evidence_point_number"></div>
           </div>
-
-          <div class="mt-10">
-            <label>Location of Evidence</label>
-            <input type="text" name="evidence_location">
-          </div>
-
-          <div class="mt-10">
-            <label>Description of Evidence</label>
-            <textarea name="evidence_description"></textarea>
-          </div>
-
+          <div class="mt-10"><label>Location of Evidence</label><input type="text" name="evidence_location"></div>
+          <div class="mt-10"><label>Description of Evidence</label><textarea name="evidence_description"></textarea></div>
           <div class="grid-3 mt-10">
-            <div>
-              <label>Condition</label>
-              <input type="text" name="evidence_condition">
-            </div>
-            <div>
-              <label>Colour / Age of Evidence</label>
-              <input type="text" name="evidence_colour_age">
-            </div>
-            <div>
-              <label>Markings</label>
-              <input type="text" name="evidence_markings">
-            </div>
+            <div><label>Condition</label><input type="text" name="evidence_condition"></div>
+            <div><label>Colour / Age of Evidence</label><input type="text" name="evidence_colour_age"></div>
+            <div><label>Markings</label><input type="text" name="evidence_markings"></div>
           </div>
-
-          <div class="mt-10">
-            <label>If Not Found – Extent of Search</label>
-            <textarea name="evidence_extent_search"></textarea>
-          </div>
+          <div class="mt-10"><label>If Not Found – Extent of Search</label><textarea name="evidence_extent_search"></textarea></div>
         </div>
 
         <div class="section">
@@ -621,273 +529,237 @@
           <table>
             <thead>
               <tr>
-                <th style="width: 22%;">Distance (m)</th>
-                <th style="width: 28%;">Direction to Object</th>
+                <th style="width:22%;">Distance (m)</th>
+                <th style="width:28%;">Direction to Object</th>
                 <th>Object</th>
               </tr>
             </thead>
             <tbody>
-              ${Array.from({length: 5}).map((_, i) => `
-              <tr>
-                <td><input type="text" name="prox_dist_${i+1}"></td>
-                <td><input type="text" name="prox_dir_${i+1}"></td>
-                <td><input type="text" name="prox_obj_${i+1}"></td>
-              </tr>`).join('')}
+              <tr><td><input type="text" name="prox_dist_1"></td><td><input type="text" name="prox_dir_1"></td><td><input type="text" name="prox_obj_1"></td></tr>
+              <tr><td><input type="text" name="prox_dist_2"></td><td><input type="text" name="prox_dir_2"></td><td><input type="text" name="prox_obj_2"></td></tr>
+              <tr><td><input type="text" name="prox_dist_3"></td><td><input type="text" name="prox_dir_3"></td><td><input type="text" name="prox_obj_3"></td></tr>
+              <tr><td><input type="text" name="prox_dist_4"></td><td><input type="text" name="prox_dir_4"></td><td><input type="text" name="prox_obj_4"></td></tr>
+              <tr><td><input type="text" name="prox_dist_5"></td><td><input type="text" name="prox_dir_5"></td><td><input type="text" name="prox_obj_5"></td></tr>
             </tbody>
           </table>
         </div>
 
         <div class="section">
           <div class="section-title">Evidence Photos</div>
-          <div class="section-subtext">
-            Attach images related to this evidence. Thumbnails are kept compact so they do not push other content off the page.
-          </div>
+          <div class="section-subtext">Attach images related to this evidence. Thumbnails are kept compact so they do not push other content off the page.</div>
           <div class="photo-upload">
-            <button type="button" class="btn-secondary add-photo-btn">
-              + Add Photo
-            </button>
+            <button type="button" class="btn-secondary add-photo-btn">+ Add Photo</button>
             <input type="file" class="photo-input" accept="image/*" multiple style="display:none;">
             <div class="photo-grid"></div>
           </div>
         </div>
       </div>
 
-      <!-- EXTRA PAGES ADDED HERE -->
+      <!-- EXTRA PAGES GO HERE -->
       <div id="extraPages"></div>
 
     </form>
   </div>
 </div>
 
-<!-- html2pdf bundle (includes html2canvas + jsPDF internally) -->
+<!-- html2pdf bundle (includes html2canvas + jsPDF) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-  (function () {
-    const extraPages = document.getElementById('extraPages');
-    const addTraverseBtn = document.getElementById('addTraversePage');
-    const addEvidenceBtn = document.getElementById('addEvidencePage');
-    const resetBtn = document.getElementById('resetForm');
-    const downloadBtn = document.getElementById('downloadPdf');
-    const form = document.getElementById('evidenceForm');
+(function () {
+  const extraPages   = document.getElementById('extraPages');
+  const addTraverse  = document.getElementById('addTraversePage');
+  const addEvidence  = document.getElementById('addEvidencePage');
+  const resetBtn     = document.getElementById('resetForm');
+  const downloadBtn  = document.getElementById('downloadPdf');
+  const form         = document.getElementById('evidenceForm');
 
-    /* ---------- Evidence Page Image Handling ---------- */
-    function initEvidencePage(pageEl) {
-      const addPhotoBtn = pageEl.querySelector('.add-photo-btn');
-      const fileInput = pageEl.querySelector('.photo-input');
-      const photoGrid = pageEl.querySelector('.photo-grid');
+  /* ----- Evidence Photos (init for any evidence page) ----- */
+  function initEvidencePage(pageEl) {
+    const addPhotoBtn = pageEl.querySelector('.add-photo-btn');
+    const fileInput   = pageEl.querySelector('.photo-input');
+    const photoGrid   = pageEl.querySelector('.photo-grid');
+    if (!addPhotoBtn || !fileInput || !photoGrid) return;
 
-      if (!addPhotoBtn || !fileInput || !photoGrid) return;
+    addPhotoBtn.addEventListener('click', () => fileInput.click());
 
-      addPhotoBtn.addEventListener('click', function () {
-        fileInput.click();
+    fileInput.addEventListener('change', () => {
+      const files = Array.from(fileInput.files || []);
+      files.forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+
+        const reader = new FileReader();
+        const card   = document.createElement('div');
+        card.className = 'photo-card';
+
+        const img = document.createElement('img');
+        img.alt   = file.name;
+
+        const caption = document.createElement('textarea');
+        caption.placeholder = 'Photo description';
+
+        card.appendChild(img);
+        card.appendChild(caption);
+        photoGrid.appendChild(card);
+
+        reader.onload = e => { img.src = e.target.result; };
+        reader.readAsDataURL(file);
       });
+      fileInput.value = "";
+    });
+  }
 
-      fileInput.addEventListener('change', function () {
-        const files = Array.from(fileInput.files || []);
-        files.forEach(function (file) {
-          if (!file.type.startsWith('image/')) return;
+  // Init base evidence page
+  initEvidencePage(document.getElementById('evidencePage'));
 
-          const reader = new FileReader();
-          const card = document.createElement('div');
-          card.className = 'photo-card';
-
-          const img = document.createElement('img');
-          img.alt = file.name;
-
-          const caption = document.createElement('textarea');
-          caption.placeholder = 'Photo description';
-
-          card.appendChild(img);
-          card.appendChild(caption);
-          photoGrid.appendChild(card);
-
-          reader.onload = function (e) {
-            img.src = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        });
-
-        // clear input so the same file can be selected again
-        fileInput.value = "";
-      });
-    }
-
-    // Initialize the original Evidence page
-    const initialEvidencePage = document.getElementById('evidencePage');
-    if (initialEvidencePage) initEvidencePage(initialEvidencePage);
-
-    /* ---------- Templates for Extra Pages ---------- */
-
-    const traverseTemplate = `
-      <div class="form-page traverse-page">
-        <div class="page-title">Traverse Notes and Point List (Additional)</div>
-        <div class="section">
-          <div class="section-title">Set Up</div>
-          <div class="inline-labels">
-            <div>
-              <label>Instrument</label>
-              <input type="text" name="instrument_extra[]">
-            </div>
-            <div>
-              <label>Setup Point</label>
-              <input type="text" name="setup_point_extra[]">
-            </div>
-            <div>
-              <label>Backsight Point</label>
-              <input type="text" name="backsight_point_extra[]">
-            </div>
-          </div>
+  /* ----- Templates for dynamic pages ----- */
+  const traverseTemplate = `
+    <div class="form-page traverse-page">
+      <div class="page-title">Traverse Notes and Point List (Additional)</div>
+      <div class="section">
+        <div class="section-title">Set Up</div>
+        <div class="inline-labels">
+          <div><label>Instrument</label><input type="text" name="instrument_extra[]"></div>
+          <div><label>Setup Point</label><input type="text" name="setup_point_extra[]"></div>
+          <div><label>Backsight Point</label><input type="text" name="backsight_point_extra[]"></div>
         </div>
-        <div class="section">
-          <div class="section-title">Point List for Conventional Survey</div>
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 25%;">Point No.</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${Array.from({length: 15}).map((_, i) => `
+      </div>
+      <div class="section">
+        <div class="section-title">Point List for Conventional Survey</div>
+        <table>
+          <thead><tr><th style="width:25%;">Point No.</th><th>Description</th></tr></thead>
+          <tbody>
+            ${Array.from({length:15}).map((_,i)=>`
               <tr>
                 <td><input type="text" name="pt_no_extra_${i+1}"></td>
                 <td><input type="text" name="pt_desc_extra_${i+1}"></td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
+              </tr>`).join("")}
+          </tbody>
+        </table>
       </div>
-    `;
+    </div>`;
 
-    const evidenceTemplate = `
-      <div class="form-page evidence-page">
-        <div class="page-title">Evidence Report (Additional)</div>
-        <div class="section">
-          <div class="section-title">Evidence Details</div>
-          <div class="grid-2">
-            <div>
-              <label>Date</label>
-              <input type="date" name="evidence_date_extra[]">
-            </div>
-            <div>
-              <label>Point Number</label>
-              <input type="text" name="evidence_point_number_extra[]">
-            </div>
-          </div>
-          <div class="mt-10">
-            <label>Location of Evidence</label>
-            <input type="text" name="evidence_location_extra[]">
-          </div>
-          <div class="mt-10">
-            <label>Description of Evidence</label>
-            <textarea name="evidence_description_extra[]"></textarea>
-          </div>
-          <div class="grid-3 mt-10">
-            <div>
-              <label>Condition</label>
-              <input type="text" name="evidence_condition_extra[]">
-            </div>
-            <div>
-              <label>Colour / Age of Evidence</label>
-              <input type="text" name="evidence_colour_age_extra[]">
-            </div>
-            <div>
-              <label>Markings</label>
-              <input type="text" name="evidence_markings_extra[]">
-            </div>
-          </div>
-          <div class="mt-10">
-            <label>If Not Found – Extent of Search</label>
-            <textarea name="evidence_extent_search_extra[]"></textarea>
-          </div>
+  const evidenceTemplate = `
+    <div class="form-page evidence-page">
+      <div class="page-title">Evidence Report (Additional)</div>
+      <div class="section">
+        <div class="section-title">Evidence Details</div>
+        <div class="grid-2">
+          <div><label>Date</label><input type="date" name="evidence_date_extra[]"></div>
+          <div><label>Point Number</label><input type="text" name="evidence_point_number_extra[]"></div>
         </div>
-        <div class="section">
-          <div class="section-title">Proximities from Pin</div>
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 22%;">Distance (m)</th>
-                <th style="width: 28%;">Direction to Object</th>
-                <th>Object</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${Array.from({length: 5}).map((_, i) => `
+        <div class="mt-10"><label>Location of Evidence</label><input type="text" name="evidence_location_extra[]"></div>
+        <div class="mt-10"><label>Description of Evidence</label><textarea name="evidence_description_extra[]"></textarea></div>
+        <div class="grid-3 mt-10">
+          <div><label>Condition</label><input type="text" name="evidence_condition_extra[]"></div>
+          <div><label>Colour / Age of Evidence</label><input type="text" name="evidence_colour_age_extra[]"></div>
+          <div><label>Markings</label><input type="text" name="evidence_markings_extra[]"></div>
+        </div>
+        <div class="mt-10"><label>If Not Found – Extent of Search</label><textarea name="evidence_extent_search_extra[]"></textarea></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Proximities from Pin</div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:22%;">Distance (m)</th>
+              <th style="width:28%;">Direction to Object</th>
+              <th>Object</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${Array.from({length:5}).map((_,i)=>`
               <tr>
                 <td><input type="text" name="prox_dist_extra_${i+1}"></td>
                 <td><input type="text" name="prox_dir_extra_${i+1}"></td>
                 <td><input type="text" name="prox_obj_extra_${i+1}"></td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-        <div class="section">
-          <div class="section-title">Evidence Photos</div>
-          <div class="section-subtext">
-            Attach images for this additional evidence entry.
-          </div>
-          <div class="photo-upload">
-            <button type="button" class="btn-secondary add-photo-btn">
-              + Add Photo
-            </button>
-            <input type="file" class="photo-input" accept="image/*" multiple style="display:none;">
-            <div class="photo-grid"></div>
-          </div>
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+      <div class="section">
+        <div class="section-title">Evidence Photos</div>
+        <div class="section-subtext">Attach images for this additional evidence entry.</div>
+        <div class="photo-upload">
+          <button type="button" class="btn-secondary add-photo-btn">+ Add Photo</button>
+          <input type="file" class="photo-input" accept="image/*" multiple style="display:none;">
+          <div class="photo-grid"></div>
         </div>
       </div>
-    `;
+    </div>`;
 
-    function addPage(template, isEvidence) {
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = template.trim();
-      const pageEl = wrapper.firstElementChild;
-      extraPages.appendChild(pageEl);
-      if (isEvidence) initEvidencePage(pageEl);
-    }
+  function addPage(template, isEvidence) {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = template.trim();
+    const pageEl = wrapper.firstElementChild;
+    extraPages.appendChild(pageEl);
+    if (isEvidence) initEvidencePage(pageEl);
+  }
 
-    /* ---------- Add page buttons ---------- */
-    if (addTraverseBtn) {
-      addTraverseBtn.addEventListener('click', function () {
-        addPage(traverseTemplate, false);
-      });
-    }
+  if (addTraverse) addTraverse.addEventListener('click', () => addPage(traverseTemplate, false));
+  if (addEvidence) addEvidence.addEventListener('click', () => addPage(evidenceTemplate, true));
 
-    if (addEvidenceBtn) {
-      addEvidenceBtn.addEventListener('click', function () {
-        addPage(evidenceTemplate, true);
-      });
-    }
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      form.reset();
+      extraPages.innerHTML = "";
+      document.querySelectorAll('.photo-grid').forEach(grid => grid.innerHTML = "");
+    });
+  }
 
-    /* ---------- Reset form ---------- */
-    if (resetBtn) {
-      resetBtn.addEventListener('click', function () {
-        form.reset();
-        extraPages.innerHTML = "";
-        document.querySelectorAll('.photo-grid').forEach(function (grid) {
-          grid.innerHTML = "";
+  /* ----- DOWNLOAD PDF: one page per .form-page, scaled to fit ----- */
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', async () => {
+      const container = document.querySelector('.container');
+      const allPages  = Array.from(document.querySelectorAll('.form-page'));
+      const originalDisplays = allPages.map(p => p.style.display || "");
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'letter');
+
+      let first = true;
+
+      for (let i = 0; i < allPages.length; i++) {
+        // Show only this logical page (with header)
+        allPages.forEach((page, idx) => {
+          page.style.display = (idx === i) ? 'block' : 'none';
         });
+
+        const canvas = await html2canvas(container, {
+          scale: 2,
+          useCORS: true
+        });
+
+        const imgData   = canvas.toDataURL('image/jpeg', 0.98);
+        const pdfWidth  = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+
+        // Fit entire canvas into the PDF page (no clipping)
+        let imgWidth  = canvas.width;
+        let imgHeight = canvas.height;
+        const scale   = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+
+        imgWidth  *= scale;
+        imgHeight *= scale;
+
+        const x = (pdfWidth  - imgWidth)  / 2;
+        const y = (pdfHeight - imgHeight) / 2;
+
+        if (!first) pdf.addPage();
+        first = false;
+
+        pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
+      }
+
+      // Restore original layout
+      allPages.forEach((page, idx) => {
+        page.style.display = originalDisplays[idx];
       });
-    }
 
-    /* ---------- PDF EXPORT (html2pdf, one page per .form-page) ---------- */
-    if (downloadBtn) {
-      downloadBtn.addEventListener('click', function () {
-        const element = document.querySelector('.container');
-
-        const opt = {
-          margin: 10,
-          filename: 'EvidenceReport.pdf',
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' },
-          pagebreak: { mode: ['css', 'legacy'], before: '.form-page' }
-        };
-
-        html2pdf().set(opt).from(element).save();
-      });
-    }
-  })();
+      pdf.save('EvidenceReport.pdf');
+    });
+  }
+})();
 </script>
 </body>
 </html>
