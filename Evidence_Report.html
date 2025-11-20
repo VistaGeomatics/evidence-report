@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vista Geomatics – Evidence Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* COLOR + THEME VARIABLES (Vista style) */
+    :root {
+      --vista-blue: #165f7d;
+      --vista-blue-light: #2a7fa3;
+      --vista-blue-dark: #0b3045;
+
+      --bg-body: #eef3f9;
+      --bg-card: #ffffff;
+      --accent-soft: #e2f0f6;
+      --border-soft: #d6e2f0;
+      --text-main: #101827;
+      --text-muted: #6b7280;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      margin: 0;
+      padding: 24px;
+      background: radial-gradient(circle at top, #f4f8fc 0, #e4edf6 40%, #dde6f3 100%);
+      color: var(--text-main);
+    }
+
+    .page-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .container {
+      background: var(--bg-card);
+      border-radius: 18px;
+      box-shadow: 0 18px 40px rgba(5, 41, 66, 0.18), 0 0 0 1px rgba(5, 41, 66, 0.04);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* DECOR TOP GLOW */
+    .container::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at top right, rgba(22,95,125,0.18), transparent 55%);
+      opacity: 0.9;
+    }
+
+    /* HEADER */
+    .header-bar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 28px;
+      background: linear-gradient(120deg, var(--vista-blue-light) 0%, var(--vista-blue) 40%, var(--vista-blue-dark) 100%);
+      color: #fff;
+    }
+
+    .header-left h1 {
+      margin: 0;
+      font-family: "Montserrat", sans-serif;
+      font-size: 1.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .vista-bold { font-weight: 700; }
+    .geomatics-regular { font-weight: 400; }
+
+    .header-left p {
+      margin: 0;
+      font-size: 0.95rem;
+      opacity: 0.92;
+    }
+
+    .header-logo {
+      height: 80px;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.35));
+    }
+
+    /* PAGE WRAPPERS */
+    .form-page {
+      position: relative;
+      z-index: 1;
+      padding: 24px 24px 32px;
+      page-break-after: always;
+      page-break-inside: avoid;
+    }
+
+    .form-page:last-of-type {
+      /* extra pages will still break after themselves */
+    }
+
+    .page-title {
+      font-family: "Montserrat", sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 8px 0 18px;
+      color: var(--vista-blue-dark);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* SECTION CARDS */
+    .section {
+      margin: 16px 0;
+      padding: 18px 20px 20px;
+      border-radius: 14px;
+      border: 1px solid var(--border-soft);
+      background: linear-gradient(135deg, #fbfdff 0%, #f4f8fd 60%, #eff5fb 100%);
+      box-shadow: 0 10px 24px rgba(5, 41, 66, 0.05);
+      position: relative;
+    }
+
+    .section::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--vista-blue-light), var(--vista-blue-dark));
+    }
+
+    .section-title {
+      font-weight: 600;
+      font-size: 1.02rem;
+      color: var(--vista-blue-dark);
+      margin-bottom: 6px;
+    }
+
+    .section-subtext {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    label {
+      font-size: 0.84rem;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 7px 9px;
+      font-size: 0.9rem;
+      border: 1px solid var(--border-soft);
+      border-radius: 9px;
+      background: #f9fbff;
+      transition: 0.15s;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--vista-blue-light);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(38,132,168,0.22);
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+    }
+
+    /* TABLES FOR MET + POINT LIST */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+
+    th, td {
+      border: 1px solid #c6d4e5;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #e7f0fb;
+      font-weight: 600;
+    }
+
+    .table-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* BUTTONS */
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      padding: 9px 18px;
+      font-size: 0.88rem;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(120deg, var(--vista-blue-light), var(--vista-blue), var(--vista-blue-dark));
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(5, 41, 66, 0.35);
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: var(--text-main);
+      border: 1px solid #d4d7dd;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--vista-blue-dark);
+      border: 1px dashed var(--vista-blue-light);
+    }
+
+    .btn-row-controls {
+      justify-content: flex-start;
+    }
+
+    /* PHOTO UPLOAD AREA */
+    .photo-upload {
+      margin-top: 10px;
+    }
+
+    .photo-grid {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      max-height: 260px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .photo-card {
+      border: 1px solid #c6d4e5;
+      border-radius: 10px;
+      padding: 6px;
+      width: 150px;
+      background: #f7fbff;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: 100px;
+      border-radius: 7px;
+      object-fit: cover;
+      border: 1px solid #d4dfe9;
+      background: #e5edf7;
+    }
+
+    .photo-card textarea {
+      font-size: 0.78rem;
+      min-height: 48px;
+      resize: vertical;
+    }
+
+    /* SMALL UTILS */
+    .inline-labels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .mt-10 { margin-top: 10px; }
+    .mt-14 { margin-top: 14px; }
+
+    /* PRINT STYLES */
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+
+      .page-wrap {
+        max-width: 100%;
+        margin: 0;
+      }
+
+      .container {
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .container::before {
+        display: none;
+      }
+
+      .btn-row,
+      .btn-row-controls {
+        display: none !important;
+      }
+
+      input,
+      textarea,
+      select {
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="container">
+    <div class="header-bar">
+      <div class="header-left">
+        <h1><span class="vista-bold">VISTA</span><span class="geomatics-regular"> GEOMATICS</span></h1>
+        <p>Evidence Report – RPR</p>
+      </div>
+      <!-- Replace src with your logo path -->
+      <img src="../vista-geomatics.png" class="header-logo" alt="Vista Geomatics Logo">
+    </div>
+
+    <form id="evidenceForm">
+      <!-- ================= PAGE 1 – TITLE PAGE ================= -->
+      <div class="form-page" id="titlePage">
+        <div class="page-title">Title Page</div>
+
+        <div class="section">
+          <div class="section-title">Job Details</div>
+          <div class="grid-2">
+            <div>
+              <label>Job No.</label>
+              <input type="text" name="job_no">
+            </div>
+            <div>
+              <label>Client</label>
+              <input type="text" name="client">
+            </div>
+            <div>
+              <label>Client Contact</label>
+              <input type="text" name="client_contact">
+            </div>
+            <div>
+              <label>Job Description</label>
+              <input type="text" name="job_description">
+            </div>
+          </div>
+
+          <div class="grid-2 mt-14">
+            <div>
+              <label>Crew Chief</label>
+              <input type="text" name="crew_chief">
+            </div>
+            <div>
+              <label>Assistant</label>
+              <input type="text" name="assistant">
+            </div>
+            <div>
+              <label>Start Date</label>
+              <input type="date" name="start_date">
+            </div>
+            <div>
+              <label>End Date</label>
+              <input type="date" name="end_date">
+            </div>
+            <div>
+              <label>Project Manager</label>
+              <input type="text" name="project_manager">
+            </div>
+            <div>
+              <label>Land Surveyor</label>
+              <input type="text" name="land_surveyor">
+            </div>
+            <div>
+              <label>Location</label>
+              <input type="text" name="location">
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Job Details and Client Instructions</div>
+          <textarea name="job_details_client_instructions"></textarea>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Site Conditions & Equipment</div>
+          <div class="grid-2">
+            <!-- Meteorological Information -->
+            <div>
+              <div class="section-subtext"><strong>Meteorological Information</strong></div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>DATE</th>
+                    <th>TEMP (°C)</th>
+                    <th>PRESSURE (HPA)</th>
+                    <th>WIND SPEED (KM/H)</th>
+                    <th>CONDITIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- a few rows to stay within one page -->
+                  <tr>
+                    <td><input type="text" name="met_date_1"></td>
+                    <td><input type="text" name="met_temp_1"></td>
+                    <td><input type="text" name="met_pressure_1"></td>
+                    <td><input type="text" name="met_wind_1"></td>
+                    <td><input type="text" name="met_cond_1"></td>
+                  </tr>
+                  <tr>
+                    <td><input type="text" name="met_date_2"></td>
+                    <td><input type="text" name="met_temp_2"></td>
+                    <td><input type="text" name="met_pressure_2"></td>
+                    <td><input type="text" name="met_wind_2"></td>
+                    <td><input type="text" name="met_cond_2"></td>
+                  </tr>
+                  <tr>
+                    <td><input type="text" name="met_date_3"></td>
+                    <td><input type="text" name="met_temp_3"></td>
+                    <td><input type="text" name="met_pressure_3"></td>
+                    <td><input type="text" name="met_wind_3"></td>
+                    <td><input type="text" name="met_cond_3"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Survey Equipment -->
+            <div>
+              <div class="section-subtext"><strong>Survey Equipment</strong></div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>TYPE</th>
+                    <th>MODEL</th>
+                    <th>SERIAL NO.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><input type="text" name="equip_type_1"></td>
+                    <td><input type="text" name="equip_model_1"></td>
+                    <td><input type="text" name="equip_serial_1"></td>
+                  </tr>
+                  <tr>
+                    <td><input type="text" name="equip_type_2"></td>
+                    <td><input type="text" name="equip_model_2"></td>
+                    <td><input type="text" name="equip_serial_2"></td>
+                  </tr>
+                  <tr>
+                    <td><input type="text" name="equip_type_3"></td>
+                    <td><input type="text" name="equip_model_3"></td>
+                    <td><input type="text" name="equip_serial_3"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTROL BUTTONS – bottom of Title Page -->
+        <div class="section">
+          <div class="section-title">Form Controls</div>
+          <div class="section-subtext">
+            Add extra pages, reset the form, or download / print as PDF.
+          </div>
+          <div class="btn-row btn-row-controls">
+            <button type="button" id="addTraversePage" class="btn-primary">
+              + Add Traverse Notes / Point List Page
+            </button>
+            <button type="button" id="addEvidencePage" class="btn-primary">
+              + Add Evidence Report Page
+            </button>
+            <button type="button" id="resetForm" class="btn-secondary">
+              Reset Form
+            </button>
+            <button type="button" id="downloadPdf" class="btn-ghost">
+              Download / Print PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============= PAGE 2 – TRAVERSE NOTES & POINT LIST ============= -->
+      <div class="form-page traverse-page">
+        <div class="page-title">Traverse Notes and Point List</div>
+
+        <div class="section">
+          <div class="section-title">Set Up</div>
+          <div class="inline-labels">
+            <div>
+              <label>Instrument</label>
+              <input type="text" name="instrument">
+            </div>
+            <div>
+              <label>Setup Point</label>
+              <input type="text" name="setup_point">
+            </div>
+            <div>
+              <label>Backsight Point</label>
+              <input type="text" name="backsight_point">
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Point List for Conventional Survey</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25%;">Point No.</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- enough rows to mimic the paper form without going beyond one page too easily -->
+              <!-- You can add/remove rows if needed -->
+              <!-- 15 rows -->
+              <!-- Row 1 -->
+              <tr>
+                <td><input type="text" name="pt_no_1"></td>
+                <td><input type="text" name="pt_desc_1"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_2"></td>
+                <td><input type="text" name="pt_desc_2"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_3"></td>
+                <td><input type="text" name="pt_desc_3"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_4"></td>
+                <td><input type="text" name="pt_desc_4"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_5"></td>
+                <td><input type="text" name="pt_desc_5"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_6"></td>
+                <td><input type="text" name="pt_desc_6"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_7"></td>
+                <td><input type="text" name="pt_desc_7"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_8"></td>
+                <td><input type="text" name="pt_desc_8"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_9"></td>
+                <td><input type="text" name="pt_desc_9"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_10"></td>
+                <td><input type="text" name="pt_desc_10"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_11"></td>
+                <td><input type="text" name="pt_desc_11"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_12"></td>
+                <td><input type="text" name="pt_desc_12"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_13"></td>
+                <td><input type="text" name="pt_desc_13"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_14"></td>
+                <td><input type="text" name="pt_desc_14"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="pt_no_15"></td>
+                <td><input type="text" name="pt_desc_15"></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-note">
+            For additional points, use “Add Traverse Notes / Point List Page” on the Title Page.
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= PAGE 3 – EVIDENCE REPORT ================= -->
+      <div class="form-page evidence-page" id="evidencePage">
+        <div class="page-title">Evidence Report</div>
+
+        <div class="section">
+          <div class="section-title">Evidence Details</div>
+          <div class="grid-2">
+            <div>
+              <label>Date</label>
+              <input type="date" name="evidence_date">
+            </div>
+            <div>
+              <label>Point Number</label>
+              <input type="text" name="evidence_point_number">
+            </div>
+          </div>
+
+          <div class="mt-10">
+            <label>Location of Evidence</label>
+            <input type="text" name="evidence_location">
+          </div>
+
+          <div class="mt-10">
+            <label>Description of Evidence</label>
+            <textarea name="evidence_description"></textarea>
+          </div>
+
+          <div class="grid-3 mt-10">
+            <div>
+              <label>Condition</label>
+              <input type="text" name="evidence_condition">
+            </div>
+            <div>
+              <label>Colour / Age of Evidence</label>
+              <input type="text" name="evidence_colour_age">
+            </div>
+            <div>
+              <label>Markings</label>
+              <input type="text" name="evidence_markings">
+            </div>
+          </div>
+
+          <div class="mt-10">
+            <label>If Not Found – Extent of Search</label>
+            <textarea name="evidence_extent_search"></textarea>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Proximities from Pin</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 22%;">Distance (m)</th>
+                <th style="width: 28%;">Direction to Object</th>
+                <th>Object</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="text" name="prox_dist_1"></td>
+                <td><input type="text" name="prox_dir_1"></td>
+                <td><input type="text" name="prox_obj_1"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="prox_dist_2"></td>
+                <td><input type="text" name="prox_dir_2"></td>
+                <td><input type="text" name="prox_obj_2"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="prox_dist_3"></td>
+                <td><input type="text" name="prox_dir_3"></td>
+                <td><input type="text" name="prox_obj_3"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="prox_dist_4"></td>
+                <td><input type="text" name="prox_dir_4"></td>
+                <td><input type="text" name="prox_obj_4"></td>
+              </tr>
+              <tr>
+                <td><input type="text" name="prox_dist_5"></td>
+                <td><input type="text" name="prox_dir_5"></td>
+                <td><input type="text" name="prox_obj_5"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Evidence Photos</div>
+          <div class="section-subtext">
+            Attach images related to this evidence. Thumbnails are kept small so they don’t push other content off the page.
+          </div>
+          <div class="photo-upload">
+            <button type="button" class="btn-secondary add-photo-btn">
+              + Add Photo
+            </button>
+            <input type="file" class="photo-input" accept="image/*" multiple style="display:none;">
+            <div class="photo-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXTRA PAGES ADDED HERE -->
+      <div id="extraPages"></div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const extraPages = document.getElementById('extraPages');
+    const addTraverseBtn = document.getElementById('addTraversePage');
+    const addEvidenceBtn = document.getElementById('addEvidencePage');
+    const resetBtn = document.getElementById('resetForm');
+    const downloadBtn = document.getElementById('downloadPdf');
+    const form = document.getElementById('evidenceForm');
+
+    /* ---------- Evidence Page Image Handling ---------- */
+    function initEvidencePage(pageEl) {
+      const addPhotoBtn = pageEl.querySelector('.add-photo-btn');
+      const fileInput = pageEl.querySelector('.photo-input');
+      const photoGrid = pageEl.querySelector('.photo-grid');
+
+      if (!addPhotoBtn || !fileInput || !photoGrid) return;
+
+      addPhotoBtn.addEventListener('click', function () {
+        fileInput.click();
+      });
+
+      fileInput.addEventListener('change', function () {
+        const files = Array.from(fileInput.files || []);
+        files.forEach(function (file) {
+          if (!file.type.startsWith('image/')) return;
+
+          const reader = new FileReader();
+          const card = document.createElement('div');
+          card.className = 'photo-card';
+
+          const img = document.createElement('img');
+          img.alt = file.name;
+
+          const caption = document.createElement('textarea');
+          caption.placeholder = 'Photo description';
+
+          card.appendChild(img);
+          card.appendChild(caption);
+          photoGrid.appendChild(card);
+
+          reader.onload = function (e) {
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+
+        // clear input so same file can be selected again if needed
+        fileInput.value = "";
+      });
+    }
+
+    // Initialize the original Evidence page
+    const initialEvidencePage = document.getElementById('evidencePage');
+    initEvidencePage(initialEvidencePage);
+
+    /* ---------- Templates for Extra Pages ---------- */
+
+    const traverseTemplate = `
+      <div class="form-page traverse-page">
+        <div class="page-title">Traverse Notes and Point List (Additional)</div>
+        <div class="section">
+          <div class="section-title">Set Up</div>
+          <div class="inline-labels">
+            <div>
+              <label>Instrument</label>
+              <input type="text" name="instrument_extra[]">
+            </div>
+            <div>
+              <label>Setup Point</label>
+              <input type="text" name="setup_point_extra[]">
+            </div>
+            <div>
+              <label>Backsight Point</label>
+              <input type="text" name="backsight_point_extra[]">
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">Point List for Conventional Survey</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25%;">Point No.</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${Array.from({length: 15}).map((_, i) => `
+                <tr>
+                  <td><input type="text" name="pt_no_extra_${i+1}"></td>
+                  <td><input type="text" name="pt_desc_extra_${i+1}"></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    const evidenceTemplate = `
+      <div class="form-page evidence-page">
+        <div class="page-title">Evidence Report (Additional)</div>
+        <div class="section">
+          <div class="section-title">Evidence Details</div>
+          <div class="grid-2">
+            <div>
+              <label>Date</label>
+              <input type="date" name="evidence_date_extra[]">
+            </div>
+            <div>
+              <label>Point Number</label>
+              <input type="text" name="evidence_point_number_extra[]">
+            </div>
+          </div>
+          <div class="mt-10">
+            <label>Location of Evidence</label>
+            <input type="text" name="evidence_location_extra[]">
+          </div>
+          <div class="mt-10">
+            <label>Description of Evidence</label>
+            <textarea name="evidence_description_extra[]"></textarea>
+          </div>
+          <div class="grid-3 mt-10">
+            <div>
+              <label>Condition</label>
+              <input type="text" name="evidence_condition_extra[]">
+            </div>
+            <div>
+              <label>Colour / Age of Evidence</label>
+              <input type="text" name="evidence_colour_age_extra[]">
+            </div>
+            <div>
+              <label>Markings</label>
+              <input type="text" name="evidence_markings_extra[]">
+            </div>
+          </div>
+          <div class="mt-10">
+            <label>If Not Found – Extent of Search</label>
+            <textarea name="evidence_extent_search_extra[]"></textarea>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">Proximities from Pin</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 22%;">Distance (m)</th>
+                <th style="width: 28%;">Direction to Object</th>
+                <th>Object</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${Array.from({length: 5}).map((_, i) => `
+                <tr>
+                  <td><input type="text" name="prox_dist_extra_${i+1}"></td>
+                  <td><input type="text" name="prox_dir_extra_${i+1}"></td>
+                  <td><input type="text" name="prox_obj_extra_${i+1}"></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="section">
+          <div class="section-title">Evidence Photos</div>
+          <div class="section-subtext">
+            Attach images for this additional evidence entry.
+          </div>
+          <div class="photo-upload">
+            <button type="button" class="btn-secondary add-photo-btn">
+              + Add Photo
+            </button>
+            <input type="file" class="photo-input" accept="image/*" multiple style="display:none;">
+            <div class="photo-grid"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    function addPage(template, isEvidence) {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = template.trim();
+      const pageEl = wrapper.firstElementChild;
+      extraPages.appendChild(pageEl);
+      if (isEvidence) {
+        initEvidencePage(pageEl);
+      }
+    }
+
+    /* ---------- Button Hooks ---------- */
+    addTraverseBtn.addEventListener('click', function () {
+      addPage(traverseTemplate, false);
+    });
+
+    addEvidenceBtn.addEventListener('click', function () {
+      addPage(evidenceTemplate, true);
+    });
+
+    resetBtn.addEventListener('click', function () {
+      // Reset all standard controls
+      form.reset();
+      // Remove dynamically added pages
+      extraPages.innerHTML = "";
+      // Clear all photo previews (including the original page)
+      document.querySelectorAll('.photo-grid').forEach(function (grid) {
+        grid.innerHTML = "";
+      });
+    });
+
+    downloadBtn.addEventListener('click', function () {
+      // Use browser's Print to PDF – keeps page layout intact
+      window.print();
+    });
+  })();
+</script>
+</body>
+</html>
