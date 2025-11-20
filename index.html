@@ -339,7 +339,7 @@
   <div class="container">
     <div class="header-bar">
       <div class="header-left">
-        <h1><span class="vista-bold">VISTA</span><span class="geomatics-regular">GEOMATICS</span></h1>
+        <h1><span class="vista-bold">VISTA</</span><span class="geomatics-regular">GEOMATICS</span></h1>
         <p>Evidence Report</p>
       </div>
       <img src="vista-geomatics.png" class="header-logo" alt="Vista Geomatics Logo">
@@ -562,7 +562,7 @@
   </div>
 </div>
 
-<!-- jsPDF and html2canvas (no html2pdf bundle) -->
+<!-- jsPDF and html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -708,7 +708,26 @@
     });
   }
 
-  /* ----- DOWNLOAD PDF: one PDF page per .form-page, scaled to fit ----- */
+  // Helper: compress/scale an <img> into a smaller JPEG dataURL
+  function getScaledImageDataURL(img, maxPx = 1400, quality = 0.75) {
+    const iw = img.naturalWidth  || img.width;
+    const ih = img.naturalHeight || img.height;
+    if (!iw || !ih) return img.src;
+
+    const maxSide = Math.max(iw, ih);
+    const scale   = maxSide > maxPx ? (maxPx / maxSide) : 1;
+    const w       = Math.round(iw * scale);
+    const h       = Math.round(ih * scale);
+
+    const canvas = document.createElement('canvas');
+    canvas.width  = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    return canvas.toDataURL('image/jpeg', quality);
+  }
+
+  /* ----- DOWNLOAD PDF: report pages + big photo pages ----- */
   if (downloadBtn) {
     downloadBtn.addEventListener('click', async () => {
       const container = document.querySelector('.container');
@@ -720,8 +739,8 @@
 
       let first = true;
 
+      // 1) REPORT PAGES
       for (let i = 0; i < allPages.length; i++) {
-        // show only one logical page (with header) at a time
         allPages.forEach((page, idx) => {
           page.style.display = (idx === i) ? 'block' : 'none';
         });
@@ -731,7 +750,7 @@
           useCORS: true
         });
 
-        const imgData   = canvas.toDataURL('image/jpeg', 0.98);
+        const imgData   = canvas.toDataURL('image/jpeg', 0.9);
         const pdfWidth  = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
 
@@ -751,10 +770,45 @@
         pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
       }
 
-      // restore layout
+      // Restore layout
       allPages.forEach((page, idx) => {
         page.style.display = originalDisplays[idx];
       });
+
+      // 2) LARGE PHOTO PAGES
+      const photoImgs = Array.from(document.querySelectorAll('.photo-grid img'));
+      if (photoImgs.length > 0) {
+        const pdfWidth  = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const margin    = 10;
+        const availW    = pdfWidth  - margin * 2;
+        const availH    = pdfHeight - margin * 2;
+
+        photoImgs.forEach((img, index) => {
+          pdf.addPage();
+          // optional: caption header for each photo page
+          const caption = img.alt ? img.alt : `Evidence Photo ${index + 1}`;
+          pdf.setFontSize(12);
+          pdf.text(caption, margin, margin - 2); // small caption near top
+
+          const dataUrl = getScaledImageDataURL(img, 1400, 0.75);
+
+          // Make a dummy Image to get pixel dims after scaling
+          const tmpImg = new Image();
+          tmpImg.src = dataUrl;
+          const iw = tmpImg.width  || img.width  || 800;
+          const ih = tmpImg.height || img.height || 600;
+
+          const scale = Math.min(availW / iw, (availH - 8) / ih); // -8 to leave room for caption
+          const drawW = iw * scale;
+          const drawH = ih * scale;
+
+          const x = margin + (availW - drawW) / 2;
+          const y = margin + 4 + (availH - drawH) / 2;
+
+          pdf.addImage(dataUrl, 'JPEG', x, y, drawW, drawH);
+        });
+      }
 
       pdf.save('EvidenceReport.pdf');
     });
