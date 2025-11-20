@@ -100,7 +100,7 @@
     }
 
     .form-page:last-of-type {
-      /* extra pages will still break after themselves */
+      page-break-after: auto;
     }
 
     .page-title {
@@ -192,7 +192,7 @@
       gap: 14px;
     }
 
-    /* TABLES FOR MET + POINT LIST */
+    /* TABLES */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -272,7 +272,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      max-height: 260px;
+      max-height: 260px;      /* prevents photos from pushing content off page */
       overflow-y: auto;
       padding-right: 4px;
     }
@@ -314,7 +314,7 @@
     .mt-10 { margin-top: 10px; }
     .mt-14 { margin-top: 14px; }
 
-    /* PRINT STYLES */
+    /* PRINT STYLES (for browser print if needed) */
     @media print {
       body {
         background: #ffffff;
@@ -357,7 +357,7 @@
         <p>Evidence Report – RPR</p>
       </div>
       <!-- Replace src with your logo path -->
-      <img src="../vista-geomatics.png" class="header-logo" alt="Vista Geomatics Logo">
+      <img src="vista-geomatics.png" class="header-logo" alt="Vista Geomatics Logo">
     </div>
 
     <form id="evidenceForm">
@@ -424,7 +424,7 @@
         </div>
 
         <div class="section">
-          <div class="section-title">Site Conditions & Equipment</div>
+          <div class="section-title">Site Conditions and Equipment</div>
           <div class="grid-2">
             <!-- Meteorological Information -->
             <div>
@@ -440,7 +440,6 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <!-- a few rows to stay within one page -->
                   <tr>
                     <td><input type="text" name="met_date_1"></td>
                     <td><input type="text" name="met_temp_1"></td>
@@ -503,7 +502,7 @@
         <div class="section">
           <div class="section-title">Form Controls</div>
           <div class="section-subtext">
-            Add extra pages, reset the form, or download / print as PDF.
+            Add extra pages, reset the form, or download as a PDF.
           </div>
           <div class="btn-row btn-row-controls">
             <button type="button" id="addTraversePage" class="btn-primary">
@@ -516,13 +515,13 @@
               Reset Form
             </button>
             <button type="button" id="downloadPdf" class="btn-ghost">
-              Download / Print PDF
+              Download PDF
             </button>
           </div>
         </div>
       </div>
 
-      <!-- ============= PAGE 2 – TRAVERSE NOTES & POINT LIST ============= -->
+      <!-- ============= PAGE 2 – TRAVERSE NOTES and POINT LIST ============= -->
       <div class="form-page traverse-page">
         <div class="page-title">Traverse Notes and Point List</div>
 
@@ -554,10 +553,6 @@
               </tr>
             </thead>
             <tbody>
-              <!-- enough rows to mimic the paper form without going beyond one page too easily -->
-              <!-- You can add/remove rows if needed -->
-              <!-- 15 rows -->
-              <!-- Row 1 -->
               <tr>
                 <td><input type="text" name="pt_no_1"></td>
                 <td><input type="text" name="pt_desc_1"></td>
@@ -717,7 +712,7 @@
         <div class="section">
           <div class="section-title">Evidence Photos</div>
           <div class="section-subtext">
-            Attach images related to this evidence. Thumbnails are kept small so they don’t push other content off the page.
+            Attach images related to this evidence. Thumbnails are kept compact so they do not push other content off the page.
           </div>
           <div class="photo-upload">
             <button type="button" class="btn-secondary add-photo-btn">
@@ -735,6 +730,9 @@
     </form>
   </div>
 </div>
+
+<!-- html2pdf.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
   (function () {
@@ -782,7 +780,7 @@
           reader.readAsDataURL(file);
         });
 
-        // clear input so same file can be selected again if needed
+        // Clear input so the same file can be selected again if needed
         fileInput.value = "";
       });
     }
@@ -922,7 +920,7 @@
       }
     }
 
-    /* ---------- Button Hooks ---------- */
+    /* ---------- Add page buttons ---------- */
     addTraverseBtn.addEventListener('click', function () {
       addPage(traverseTemplate, false);
     });
@@ -931,20 +929,39 @@
       addPage(evidenceTemplate, true);
     });
 
+    /* ---------- Reset form ---------- */
     resetBtn.addEventListener('click', function () {
-      // Reset all standard controls
       form.reset();
-      // Remove dynamically added pages
       extraPages.innerHTML = "";
-      // Clear all photo previews (including the original page)
       document.querySelectorAll('.photo-grid').forEach(function (grid) {
         grid.innerHTML = "";
       });
     });
 
+    /* ---------- PDF EXPORT (Download to device) ---------- */
     downloadBtn.addEventListener('click', function () {
-      // Use browser's Print to PDF – keeps page layout intact
-      window.print();
+      const element = document.querySelector('.container');
+
+      const opt = {
+        margin:       10,
+        filename:     'EvidenceReport.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  {
+          scale: 2,
+          useCORS: true
+        },
+        jsPDF:        {
+          unit: 'mm',
+          format: 'letter',
+          orientation: 'portrait'
+        },
+        pagebreak: {
+          mode: ['css', 'legacy'],
+          before: '.form-page'   // ensure each .form-page starts on a new PDF page
+        }
+      };
+
+      html2pdf().set(opt).from(element).save();
     });
   })();
 </script>
