@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Vista Geomatics – Evidence Report</title>
+  <title>VISTAGEOMATICS – Evidence Report</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
 
@@ -272,7 +272,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      max-height: 260px;      /* prevents photos from pushing content off page */
+      max-height: 260px;
       overflow-y: auto;
       padding-right: 4px;
     }
@@ -353,10 +353,10 @@
   <div class="container">
     <div class="header-bar">
       <div class="header-left">
-        <h1><span class="vista-bold">VISTA</span><span class="geomatics-regular"> GEOMATICS</span></h1>
+        <h1><span class="vista-bold">VISTA</span><span class="geomatics-regular">GEOMATICS</span></h1>
         <p>Evidence Report – RPR</p>
       </div>
-      <!-- Replace src with your logo path -->
+      <!-- Logo file should be in the same folder as this HTML -->
       <img src="vista-geomatics.png" class="header-logo" alt="Vista Geomatics Logo">
     </div>
 
@@ -731,7 +731,7 @@
   </div>
 </div>
 
-<!-- html2pdf.js library -->
+<!-- html2pdf bundle (includes html2canvas + jsPDF) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
@@ -780,7 +780,7 @@
           reader.readAsDataURL(file);
         });
 
-        // Clear input so the same file can be selected again if needed
+        // clear input so the same file can be selected again
         fileInput.value = "";
       });
     }
@@ -938,30 +938,49 @@
       });
     });
 
-    /* ---------- PDF EXPORT (Download to device) ---------- */
-    downloadBtn.addEventListener('click', function () {
-      const element = document.querySelector('.container');
+    /* ---------- PDF EXPORT: one PDF page per .form-page ---------- */
+    downloadBtn.addEventListener('click', async function () {
+      const container = document.querySelector('.container');
+      const allPages = Array.from(document.querySelectorAll('.form-page'));
+      const originalDisplays = allPages.map(p => p.style.display || "");
 
-      const opt = {
-        margin:       10,
-        filename:     'EvidenceReport.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  {
+      // jsPDF is bundled inside html2pdf.bundle
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'letter');
+
+      let first = true;
+
+      for (let i = 0; i < allPages.length; i++) {
+        // Show only one logical page at a time (keeps header + that page)
+        allPages.forEach((page, idx) => {
+          page.style.display = (idx === i) ? 'block' : 'none';
+        });
+
+        const canvas = await html2canvas(container, {
           scale: 2,
           useCORS: true
-        },
-        jsPDF:        {
-          unit: 'mm',
-          format: 'letter',
-          orientation: 'portrait'
-        },
-        pagebreak: {
-          mode: ['css', 'legacy'],
-          before: '.form-page'   // ensure each .form-page starts on a new PDF page
-        }
-      };
+        });
 
-      html2pdf().set(opt).from(element).save();
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pdfWidth;
+        const imgHeight = canvas.height * pdfWidth / canvas.width;
+
+        if (!first) {
+          pdf.addPage();
+        }
+        first = false;
+
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+      }
+
+      // Restore original display states
+      allPages.forEach((page, idx) => {
+        page.style.display = originalDisplays[idx];
+      });
+
+      pdf.save('EvidenceReport.pdf');
     });
   })();
 </script>
