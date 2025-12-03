@@ -454,12 +454,13 @@
         <!-- Controls -->
         <div class="section">
           <div class="section-title">Form Controls</div>
-          <div class="section-subtext">Add extra pages, reset the form, or download as a PDF.</div>
+          <div class="section-subtext">Add extra pages, reset the form, download or share as a PDF.</div>
           <div class="btn-row btn-row-controls">
             <button type="button" id="addTraversePage" class="btn-primary">+ Add Traverse Notes / Point List Page</button>
             <button type="button" id="addEvidencePage" class="btn-primary">+ Add Evidence Report Page</button>
             <button type="button" id="resetForm" class="btn-secondary">Reset Form</button>
             <button type="button" id="downloadPdf" class="btn-ghost">Download PDF</button>
+            <button type="button" id="sharePdf" class="btn-ghost">Share PDF</button>
           </div>
         </div>
       </div>
@@ -574,7 +575,9 @@
   const addEvidence  = document.getElementById('addEvidencePage');
   const resetBtn     = document.getElementById('resetForm');
   const downloadBtn  = document.getElementById('downloadPdf');
+  const shareBtn     = document.getElementById('sharePdf');
   const form         = document.getElementById('evidenceForm');
+  const container    = document.querySelector('.container');
 
   /* ----- Evidence Photos (init for any evidence page) ----- */
   function initEvidencePage(pageEl) {
@@ -728,133 +731,194 @@
     return canvas.toDataURL('image/jpeg', quality);
   }
 
-  /* ----- DOWNLOAD PDF: report pages + photo appendix (4 per page) ----- */
-  if (downloadBtn) {
-    downloadBtn.addEventListener('click', async () => {
-      const container = document.querySelector('.container');
-      const allPages  = Array.from(document.querySelectorAll('.form-page'));
-      const originalDisplays = allPages.map(p => p.style.display || "");
+  // Build jsPDF document (all pages + photo appendix)
+  async function generatePdfDoc() {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'letter');
 
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('p', 'mm', 'letter');
+    const allPages = Array.from(document.querySelectorAll('.form-page'));
+    const pdfWidth  = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    let isFirst = true;
 
-      let first = true;
+    // 1) REPORT PAGES (one per PDF page, including extra pages)
+    for (let i = 0; i < allPages.length; i++) {
+      // Clone the full container offscreen for clean capture
+      const clone = container.cloneNode(true);
+      clone.style.position = 'absolute';
+      clone.style.left = '-9999px';
+      clone.style.top  = '0';
+      document.body.appendChild(clone);
 
-      // 1) REPORT PAGES
-      for (let i = 0; i < allPages.length; i++) {
-        allPages.forEach((page, idx) => {
-          page.style.display = (idx === i) ? 'block' : 'none';
-        });
+      // Copy field values from real form to cloned form
+      const origFields  = container.querySelectorAll('input, textarea, select');
+      const cloneFields = clone.querySelectorAll('input, textarea, select');
 
-        const canvas = await html2canvas(container, {
-          scale: 2,
-          useCORS: true
-        });
+      cloneFields.forEach((field, idx) => {
+        const orig = origFields[idx];
+        if (!orig) return;
 
-        const imgData   = canvas.toDataURL('image/jpeg', 0.9);
-        const pdfWidth  = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-
-        let imgWidth  = canvas.width;
-        let imgHeight = canvas.height;
-        const scale   = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-
-        imgWidth  *= scale;
-        imgHeight *= scale;
-
-        const x = (pdfWidth  - imgWidth)  / 2;
-        const y = (pdfHeight - imgHeight) / 2;
-
-        if (!first) pdf.addPage();
-        first = false;
-
-        pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
-      }
-
-      // Restore normal layout
-      allPages.forEach((page, idx) => {
-        page.style.display = originalDisplays[idx];
+        if (field.type === 'checkbox' || field.type === 'radio') {
+          field.checked = orig.checked;
+        } else if (field.tagName === 'SELECT') {
+          field.value = orig.value;
+        } else {
+          field.value = orig.value;
+        }
       });
 
-      // 2) LARGE PHOTO PAGES – 4 per page with descriptions
-      const photoImgs = Array.from(document.querySelectorAll('.photo-grid img'));
-      if (photoImgs.length > 0) {
-        const pdfWidth  = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const margin    = 10;
-        const availW    = pdfWidth  - margin * 2;
-        const availH    = pdfHeight - margin * 2;
+      // In the cloned container, show only this page index
+      const clonePages = clone.querySelectorAll('.form-page');
+      clonePages.forEach((page, idx) => {
+        page.style.display = (idx === i) ? 'block' : 'none';
+      });
 
-        // Build array of { img, desc }
-        const photos = photoImgs.map((img, idx) => {
-          const card = img.closest('.photo-card');
-          let desc = "";
-          if (card) {
-            const textarea = card.querySelector('textarea');
-            if (textarea && textarea.value.trim() !== "") {
-              desc = textarea.value.trim();
-            }
+      // Hide all form control button rows in the clone
+      clone.querySelectorAll('.btn-row, .btn-row-controls').forEach(row => {
+        row.style.display = 'none';
+      });
+
+      const canvas = await html2canvas(clone, {
+        scale: 2,
+        useCORS: true
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.9);
+      let imgWidth  = canvas.width;
+      let imgHeight = canvas.height;
+      const scale   = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+
+      imgWidth  *= scale;
+      imgHeight *= scale;
+
+      const x = (pdfWidth  - imgWidth)  / 2;
+      const y = (pdfHeight - imgHeight) / 2;
+
+      if (!isFirst) pdf.addPage();
+      isFirst = false;
+
+      pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
+
+      // Clean up clone
+      document.body.removeChild(clone);
+    }
+
+    // 2) LARGE PHOTO PAGES – 4 per page with descriptions
+    const photoImgs = Array.from(document.querySelectorAll('.photo-grid img'));
+    if (photoImgs.length > 0) {
+      const margin    = 10;
+      const availW    = pdfWidth  - margin * 2;
+      const availH    = pdfHeight - margin * 2;
+
+      // Build array of { img, desc }
+      const photos = photoImgs.map((img, idx) => {
+        const card = img.closest('.photo-card');
+        let desc = "";
+        if (card) {
+          const textarea = card.querySelector('textarea');
+          if (textarea && textarea.value.trim() !== "") {
+            desc = textarea.value.trim();
           }
-          if (!desc) desc = `Photo ${idx + 1}`;
-          return { img, desc };
+        }
+        if (!desc) desc = `Photo ${idx + 1}`;
+        return { img, desc };
+      });
+
+      const perPage = 4; // 4 photos per appendix page
+      const cols = 2;
+      const rows = 2;
+      const cellW = availW / cols;
+      const cellH = availH / rows;
+      const captionHeight = 6; // mm reserved for text under each photo
+
+      for (let i = 0; i < photos.length; i += perPage) {
+        const pagePhotos = photos.slice(i, i + perPage);
+        pdf.addPage();
+
+        pdf.setFontSize(12);
+        pdf.text('Evidence Photos', margin, margin - 2);
+
+        pagePhotos.forEach((p, idxOnPage) => {
+          const col = idxOnPage % cols;
+          const row = Math.floor(idxOnPage / cols);
+
+          const cellX = margin + col * cellW;
+          const cellY = margin + row * cellH;
+
+          const dataUrl = getScaledImageDataURL(p.img, 1400, 0.75);
+
+          const iw = p.img.naturalWidth || p.img.width || 800;
+          const ih = p.img.naturalHeight || p.img.height || 600;
+
+          const imgAvailH = cellH - captionHeight - 2;
+          const scale     = Math.min((cellW - 4) / iw, imgAvailH / ih);
+          const drawW     = iw * scale;
+          const drawH     = ih * scale;
+
+          const imgX = cellX + (cellW - drawW) / 2;
+          const imgY = cellY + 2;
+
+          pdf.addImage(dataUrl, 'JPEG', imgX, imgY, drawW, drawH);
+
+          // Caption
+          pdf.setFontSize(9);
+          const captionY = imgY + drawH + 3;
+          const captionX = cellX + 2;
+          const maxCaptionWidth = cellW - 4;
+          pdf.text(p.desc, captionX, captionY, { maxWidth: maxCaptionWidth });
         });
+      }
+    }
 
-        const perPage = 4; // 4 photos per appendix page
-        const cols = 2;
-        const rows = 2;
-        const cellW = availW / cols;
-        const cellH = availH / rows;
-        const captionHeight = 6; // mm reserved for text under each photo
+    return pdf;
+  }
 
-        for (let i = 0; i < photos.length; i += perPage) {
-          const pagePhotos = photos.slice(i, i + perPage);
-          pdf.addPage();
+  async function handlePdfAction(action) {
+    try {
+      const pdf = await generatePdfDoc();
 
-          // Optional page title
-          pdf.setFontSize(12);
-          pdf.text('Evidence Photos', margin, margin - 2);
+      if (action === 'download') {
+        pdf.save('EvidenceReport.pdf');
+      } else if (action === 'share') {
+        const arrayBuf = pdf.output('arraybuffer');
+        const blob = new Blob([arrayBuf], { type: 'application/pdf' });
 
-          pagePhotos.forEach((p, idxOnPage) => {
-            const col = idxOnPage % cols;
-            const row = Math.floor(idxOnPage / cols);
-
-            const cellX = margin + col * cellW;
-            const cellY = margin + row * cellH;
-
-            const dataUrl = getScaledImageDataURL(p.img, 1400, 0.75);
-
-            // Use a temp image object to get dimensions
-            const tempImg = new Image();
-            tempImg.src = dataUrl;
-            const iw = tempImg.width  || p.img.width  || 800;
-            const ih = tempImg.height || p.img.height || 600;
-
-            // Space for image inside cell (leaving a bit of room for caption text)
-            const imgAvailH = cellH - captionHeight - 2;
-            const scale     = Math.min((cellW - 4) / iw, imgAvailH / ih);
-            const drawW     = iw * scale;
-            const drawH     = ih * scale;
-
-            const imgX = cellX + (cellW - drawW) / 2;
-            const imgY = cellY + 2; // inset from top of cell
-
-            pdf.addImage(dataUrl, 'JPEG', imgX, imgY, drawW, drawH);
-
-            // Caption under the photo
-            pdf.setFontSize(9);
-            const captionY = imgY + drawH + 3;
-            const captionX = cellX + 2;
-            const maxCaptionWidth = cellW - 4;
-
-            pdf.text(p.desc, captionX, captionY, {
-              maxWidth: maxCaptionWidth
-            });
+        // Prefer Web Share API with files (iOS / modern mobile)
+        if (navigator.canShare && navigator.canShare({ files: [new File([blob], 'EvidenceReport.pdf', { type: 'application/pdf' })] })) {
+          const file = new File([blob], 'EvidenceReport.pdf', { type: 'application/pdf' });
+          await navigator.share({
+            files: [file],
+            title: 'Evidence Report',
+            text: 'Vista Geomatics Evidence Report'
           });
+        } else if (navigator.share) {
+          // Fallback: share a blob URL if possible
+          const blobUrl = URL.createObjectURL(blob);
+          try {
+            await navigator.share({
+              title: 'Evidence Report',
+              text: 'Evidence Report PDF',
+              url: blobUrl
+            });
+          } finally {
+            URL.revokeObjectURL(blobUrl);
+          }
+        } else {
+          // If share not supported, just download
+          pdf.save('EvidenceReport.pdf');
         }
       }
+    } catch (err) {
+      console.error('PDF generation/share error:', err);
+      alert('There was a problem generating the PDF. Please try again.');
+    }
+  }
 
-      pdf.save('EvidenceReport.pdf');
-    });
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', () => handlePdfAction('download'));
+  }
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => handlePdfAction('share'));
   }
 })();
 </script>
