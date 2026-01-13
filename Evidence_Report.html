@@ -30,10 +30,7 @@
       color: var(--text-main);
     }
 
-    .page-wrap {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
+    .page-wrap { max-width: 1100px; margin: 0 auto; }
 
     .container {
       background: var(--bg-card);
@@ -94,9 +91,7 @@
       page-break-inside: avoid;
     }
 
-    .form-page:last-of-type {
-      page-break-after: auto;
-    }
+    .form-page:last-of-type { page-break-after: auto; }
 
     .page-title {
       font-family: "Montserrat", sans-serif;
@@ -170,10 +165,7 @@
       box-shadow: 0 0 0 2px rgba(38,132,168,0.22);
     }
 
-    textarea {
-      min-height: 70px;
-      resize: vertical;
-    }
+    textarea { min-height: 70px; resize: vertical; }
 
     .grid-2 {
       display: grid;
@@ -200,10 +192,7 @@
       text-align: left;
     }
 
-    th {
-      background: #e7f0fb;
-      font-weight: 600;
-    }
+    th { background: #e7f0fb; font-weight: 600; }
 
     .table-note {
       font-size: 0.76rem;
@@ -253,9 +242,7 @@
       border: 1px dashed var(--vista-blue-light);
     }
 
-    .btn-row-controls {
-      justify-content: flex-start;
-    }
+    .btn-row-controls { justify-content: flex-start; }
 
     /* PHOTO UPLOAD */
     .photo-upload { margin-top: 8px; }
@@ -297,6 +284,23 @@
       resize: vertical;
     }
 
+    .photo-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .photo-remove {
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #c6d4e5;
+      background: #ffffff;
+      color: var(--vista-blue-dark);
+      cursor: pointer;
+    }
+
     .inline-labels {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -306,31 +310,37 @@
     .mt-10 { margin-top: 8px; }
     .mt-14 { margin-top: 10px; }
 
+    /* Autosave badge */
+    .save-badge {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 9999;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(22,95,125,0.18);
+      box-shadow: 0 10px 24px rgba(5,41,66,0.14);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      color: var(--vista-blue-dark);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(8px);
+    }
+    .save-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--vista-blue-light);
+      box-shadow: 0 0 0 3px rgba(42,127,163,0.18);
+    }
+
     @media print {
-      body {
-        background: #ffffff;
-        padding: 0;
-      }
-      .page-wrap {
-        max-width: 100%;
-        margin: 0;
-      }
-      .container {
-        border-radius: 0;
-        box-shadow: none;
-      }
-      .container::before {
-        display: none;
-      }
-      .btn-row,
-      .btn-row-controls {
-        display: none !important;
-      }
-      input,
-      textarea,
-      select {
-        box-shadow: none !important;
-      }
+      body { background: #ffffff; padding: 0; }
+      .page-wrap { max-width: 100%; margin: 0; }
+      .container { border-radius: 0; box-shadow: none; }
+      .container::before { display: none; }
+      .btn-row, .btn-row-controls, .save-badge { display: none !important; }
+      input, textarea, select { box-shadow: none !important; }
     }
   </style>
 </head>
@@ -339,16 +349,15 @@
   <div class="container">
     <div class="header-bar">
       <div class="header-left">
-        <!-- No space visually between VISTA and GEOMATICS -->
         <h1><span class="vista-bold">VISTA</span><span class="geomatics-regular">GEOMATICS</span></h1>
         <p>Evidence Report</p>
       </div>
       <img src="vista-geomatics.png" class="header-logo" alt="Vista Geomatics Logo">
     </div>
 
-    <form id="evidenceForm">
+    <form id="evidenceForm" autocomplete="off">
       <!-- ========== PAGE 1 – TITLE PAGE ========== -->
-      <div class="form-page" id="titlePage">
+      <div class="form-page" id="titlePage" data-page-type="title">
         <div class="page-title">Title Page</div>
 
         <div class="section">
@@ -379,17 +388,12 @@
         <div class="section">
           <div class="section-title">Site Conditions and Equipment</div>
           <div class="grid-2">
-            <!-- Meteorological -->
             <div>
               <div class="section-subtext"><strong>Meteorological Information</strong></div>
               <table>
                 <thead>
                   <tr>
-                    <th>DATE</th>
-                    <th>TEMP (°C)</th>
-                    <th>PRESSURE (HPA)</th>
-                    <th>WIND SPEED (KM/H)</th>
-                    <th>CONDITIONS</th>
+                    <th>DATE</th><th>TEMP (°C)</th><th>PRESSURE (HPA)</th><th>WIND SPEED (KM/H)</th><th>CONDITIONS</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -418,16 +422,11 @@
               </table>
             </div>
 
-            <!-- Equipment -->
             <div>
               <div class="section-subtext"><strong>Survey Equipment</strong></div>
               <table>
                 <thead>
-                  <tr>
-                    <th>TYPE</th>
-                    <th>MODEL</th>
-                    <th>SERIAL NO.</th>
-                  </tr>
+                  <tr><th>TYPE</th><th>MODEL</th><th>SERIAL NO.</th></tr>
                 </thead>
                 <tbody>
                   <tr>
@@ -451,10 +450,9 @@
           </div>
         </div>
 
-        <!-- Controls -->
         <div class="section">
           <div class="section-title">Form Controls</div>
-          <div class="section-subtext">Add extra pages, reset the form, download or share as a PDF.</div>
+          <div class="section-subtext">Add extra pages, reset the form, download or share as a PDF. Autosave is enabled on this device.</div>
           <div class="btn-row btn-row-controls">
             <button type="button" id="addTraversePage" class="btn-primary">+ Add Traverse Notes / Point List Page</button>
             <button type="button" id="addEvidencePage" class="btn-primary">+ Add Evidence Report Page</button>
@@ -466,7 +464,7 @@
       </div>
 
       <!-- ========== PAGE 2 – TRAVERSE NOTES & POINT LIST ========== -->
-      <div class="form-page traverse-page">
+      <div class="form-page traverse-page" data-page-type="traverse">
         <div class="page-title">Traverse Notes and Point List</div>
 
         <div class="section">
@@ -481,9 +479,7 @@
         <div class="section">
           <div class="section-title">Point List for Conventional Survey</div>
           <table>
-            <thead>
-              <tr><th style="width:25%;">Point No.</th><th>Description</th></tr>
-            </thead>
+            <thead><tr><th style="width:25%;">Point No.</th><th>Description</th></tr></thead>
             <tbody>
               <tr><td><input type="text" name="pt_no_1"></td><td><input type="text" name="pt_desc_1"></td></tr>
               <tr><td><input type="text" name="pt_no_2"></td><td><input type="text" name="pt_desc_2"></td></tr>
@@ -507,7 +503,7 @@
       </div>
 
       <!-- ========== PAGE 3 – EVIDENCE REPORT ========== -->
-      <div class="form-page evidence-page" id="evidencePage">
+      <div class="form-page evidence-page" id="evidencePage" data-page-type="evidence">
         <div class="page-title">Evidence Report</div>
 
         <div class="section">
@@ -530,11 +526,7 @@
           <div class="section-title">Proximities from Pin</div>
           <table>
             <thead>
-              <tr>
-                <th style="width:22%;">Distance (m)</th>
-                <th style="width:28%;">Direction to Object</th>
-                <th>Object</th>
-              </tr>
+              <tr><th style="width:22%;">Distance (m)</th><th style="width:28%;">Direction to Object</th><th>Object</th></tr>
             </thead>
             <tbody>
               <tr><td><input type="text" name="prox_dist_1"></td><td><input type="text" name="prox_dir_1"></td><td><input type="text" name="prox_obj_1"></td></tr>
@@ -548,7 +540,7 @@
 
         <div class="section">
           <div class="section-title">Evidence Photos</div>
-          <div class="section-subtext">Attach images related to this evidence. Thumbnails are compact so they don’t push other content off the page too much.</div>
+          <div class="section-subtext">Attach images related to this evidence. These photos are also saved on this device.</div>
           <div class="photo-upload">
             <button type="button" class="btn-secondary add-photo-btn">+ Add Photo</button>
             <input type="file" class="photo-input" accept="image/*" multiple style="display:none;">
@@ -559,10 +551,11 @@
 
       <!-- EXTRA PAGES GO HERE -->
       <div id="extraPages"></div>
-
     </form>
   </div>
 </div>
+
+<div class="save-badge" id="saveBadge"><span class="save-dot"></span><span id="saveBadgeText">Saved</span></div>
 
 <!-- jsPDF and html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -570,6 +563,11 @@
 
 <script>
 (function () {
+  'use strict';
+
+  /* =============================
+     ELEMENTS
+  ============================== */
   const extraPages   = document.getElementById('extraPages');
   const addTraverse  = document.getElementById('addTraversePage');
   const addEvidence  = document.getElementById('addEvidencePage');
@@ -578,13 +576,21 @@
   const shareBtn     = document.getElementById('sharePdf');
   const form         = document.getElementById('evidenceForm');
   const container    = document.querySelector('.container');
+  const badge        = document.getElementById('saveBadge');
+  const badgeText    = document.getElementById('saveBadgeText');
 
-  /* =========================
-     PERSISTENCE (localStorage)
-     - Saves all form fields, extra pages, and photo grids
-     - Restores on load on same device/browser
-  ========================== */
+  /* =============================
+     AUTOSAVE (localStorage)
+  ============================== */
   const STORAGE_KEY = 'vista_evidence_report_autosave_v1';
+  const SAVE_DEBOUNCE_MS = 350;
+
+  function showBadge(text) {
+    badgeText.textContent = text || 'Saved';
+    badge.style.display = 'flex';
+    clearTimeout(showBadge._t);
+    showBadge._t = setTimeout(() => { badge.style.display = 'none'; }, 1400);
+  }
 
   function safeJsonParse(str) {
     try { return JSON.parse(str); } catch { return null; }
@@ -592,12 +598,11 @@
 
   function sanitizeFilenamePart(str) {
     return (str || '')
-      .toString()
       .trim()
-      .replace(/\s+/g, ' ')
-      .replace(/[\\/:*?"<>|]+/g, '')   // remove illegal filename chars
-      .replace(/[\u0000-\u001F]+/g, '') // remove control chars
-      .trim();
+      .replace(/\s+/g, '_')
+      .replace(/[^a-zA-Z0-9_\-]+/g, '')
+      .replace(/_+/g, '_')
+      .replace(/^_+|_+$/g, '');
   }
 
   function getTodayISO() {
@@ -608,106 +613,141 @@
     return `${yyyy}-${mm}-${dd}`;
   }
 
-  function buildDefaultPdfFilename() {
-    const jobNo = sanitizeFilenamePart(form.querySelector('[name="job_no"]')?.value);
-    const crew  = sanitizeFilenamePart(form.querySelector('[name="crew_chief"]')?.value);
+  function buildDefaultPdfName() {
+    const jobNo = sanitizeFilenamePart(form.querySelector('[name="job_no"]')?.value || '');
+    const crew  = sanitizeFilenamePart(form.querySelector('[name="crew_chief"]')?.value || '');
     const date  = getTodayISO();
 
     const parts = ['EvidenceReport'];
     if (jobNo) parts.push(jobNo);
-    if (crew)  parts.push(crew);
+    if (crew) parts.push(crew);
     parts.push(date);
 
     return parts.join('_') + '.pdf';
   }
 
-  function snapshotFields() {
-    const fields = Array.from(container.querySelectorAll('input, textarea, select'));
-    return fields.map(f => {
-      if (f.type === 'checkbox' || f.type === 'radio') {
-        return { t: f.type, v: !!f.checked };
-      }
-      // file inputs cannot be restored; photos are stored via DOM HTML instead
-      if (f.type === 'file') {
-        return { t: 'file', v: null };
-      }
-      return { t: f.tagName, v: f.value };
-    });
-  }
+  function listFieldRecords() {
+    const fields = Array.from(form.querySelectorAll('input, textarea, select'))
+      .filter(el => el.name && el.type !== 'file');
 
-  function applyFieldsSnapshot(fieldSnap) {
-    const fields = Array.from(container.querySelectorAll('input, textarea, select'));
-    fields.forEach((f, i) => {
-      const snap = fieldSnap?.[i];
-      if (!snap) return;
+    const counts = Object.create(null);
+    return fields.map(el => {
+      const name = el.name;
+      const idx = counts[name] || 0;
+      counts[name] = idx + 1;
 
-      if (f.type === 'checkbox' || f.type === 'radio') {
-        f.checked = !!snap.v;
-      } else if (f.type === 'file') {
-        // cannot restore file input value
+      const kind = (el.tagName === 'SELECT') ? 'select' : (el.type || el.tagName.toLowerCase());
+      const record = { name, idx, kind };
+
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        record.checked = !!el.checked;
       } else {
-        f.value = snap.v ?? '';
+        record.value = el.value ?? '';
       }
+      return record;
     });
   }
 
-  function getBaseEvidencePhotoGrid() {
-    const base = document.getElementById('evidencePage');
-    return base?.querySelector('.photo-grid') || null;
+  function listExtraPageTypes() {
+    // Only pages inside #extraPages; base pages are always present
+    const pages = Array.from(extraPages.querySelectorAll('.form-page'));
+    return pages.map(p => p.getAttribute('data-page-type') || '');
   }
 
-  function saveToStorage() {
+  function listPhotosByEvidencePage() {
+    const evidencePages = Array.from(document.querySelectorAll('.evidence-page'));
+    return evidencePages.map(page => {
+      const cards = Array.from(page.querySelectorAll('.photo-card'));
+      return cards.map(card => ({
+        imgData: card.querySelector('img')?.src || '',
+        caption: card.querySelector('textarea')?.value || ''
+      }));
+    });
+  }
+
+  function saveNow() {
     const payload = {
-      v: 1,
       savedAt: Date.now(),
-      extraPagesHTML: extraPages.innerHTML,
-      baseEvidencePhotosHTML: (getBaseEvidencePhotoGrid()?.innerHTML) || '',
-      fields: snapshotFields()
+      extraPageTypes: listExtraPageTypes(),
+      fields: listFieldRecords(),
+      photos: listPhotosByEvidencePage()
     };
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      showBadge('Saved');
     } catch (e) {
-      // If storage is full (lots of photos), fail quietly rather than breaking the form
-      console.warn('Autosave failed:', e);
+      console.warn('Autosave failed (storage full?)', e);
+      showBadge('Save failed (storage full)');
     }
   }
 
-  function restoreFromStorage() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
+  const saveSoon = (() => {
+    let t = null;
+    return function () {
+      clearTimeout(t);
+      t = setTimeout(saveNow, SAVE_DEBOUNCE_MS);
+    };
+  })();
 
-    const payload = safeJsonParse(raw);
-    if (!payload || payload.v !== 1) return;
-
-    // Restore extra pages first so field order matches snapshot
-    if (typeof payload.extraPagesHTML === 'string') {
-      extraPages.innerHTML = payload.extraPagesHTML;
-    }
-
-    // Re-init evidence pages (base + restored)
-    document.querySelectorAll('.form-page.evidence-page').forEach(p => initEvidencePage(p));
-
-    // Restore base evidence photos
-    const grid = getBaseEvidencePhotoGrid();
-    if (grid && typeof payload.baseEvidencePhotosHTML === 'string') {
-      grid.innerHTML = payload.baseEvidencePhotosHTML;
-    }
-
-    // Apply field values
-    if (Array.isArray(payload.fields)) {
-      applyFieldsSnapshot(payload.fields);
-    }
+  function clearSaved() {
+    localStorage.removeItem(STORAGE_KEY);
   }
 
-  // Debounced autosave
-  let saveTimer = null;
-  function scheduleSave() {
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveToStorage, 250);
+  /* =============================
+     PHOTOS
+  ============================== */
+  function getScaledImageDataURL(img, maxPx = 1400, quality = 0.75) {
+    const iw = img.naturalWidth  || img.width;
+    const ih = img.naturalHeight || img.height;
+    if (!iw || !ih) return img.src;
+
+    const maxSide = Math.max(iw, ih);
+    const scale   = maxSide > maxPx ? (maxPx / maxSide) : 1;
+    const w       = Math.round(iw * scale);
+    const h       = Math.round(ih * scale);
+
+    const canvas = document.createElement('canvas');
+    canvas.width  = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    return canvas.toDataURL('image/jpeg', quality);
   }
 
+  function makePhotoCard(photoGrid, dataUrl, captionText) {
+    const card = document.createElement('div');
+    card.className = 'photo-card';
 
-  /* ----- Evidence Photos (init for any evidence page) ----- */
+    const img = document.createElement('img');
+    img.alt = 'Evidence photo';
+    img.src = dataUrl || '';
+
+    const caption = document.createElement('textarea');
+    caption.placeholder = 'Photo description';
+    caption.value = captionText || '';
+    caption.addEventListener('input', saveSoon);
+
+    const actions = document.createElement('div');
+    actions.className = 'photo-actions';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'photo-remove';
+    removeBtn.textContent = 'Remove';
+    removeBtn.addEventListener('click', () => {
+      card.remove();
+      saveNow();
+    });
+
+    actions.appendChild(removeBtn);
+
+    card.appendChild(img);
+    card.appendChild(caption);
+    card.appendChild(actions);
+    photoGrid.appendChild(card);
+  }
+
   function initEvidencePage(pageEl) {
     const addPhotoBtn = pageEl.querySelector('.add-photo-btn');
     const fileInput   = pageEl.querySelector('.photo-input');
@@ -718,49 +758,31 @@
 
     fileInput.addEventListener('change', () => {
       const files = Array.from(fileInput.files || []);
+      if (!files.length) return;
+
       files.forEach(file => {
         if (!file.type.startsWith('image/')) return;
 
         const reader = new FileReader();
-        const card   = document.createElement('div');
-        card.className = 'photo-card';
-
-        const img = document.createElement('img');
-        img.alt   = file.name;
-
-        const caption = document.createElement('textarea');
-        caption.placeholder = 'Photo description';
-
-        card.appendChild(img);
-        card.appendChild(caption);
-        photoGrid.appendChild(card);
-
-        reader.onload = e => { img.src = e.target.result; };
+        reader.onload = e => {
+          makePhotoCard(photoGrid, e.target.result, '');
+          saveNow();
+        };
         reader.readAsDataURL(file);
       });
-      fileInput.value = "";
-      scheduleSave();
-    });
 
-    // Save when captions are edited
-    photoGrid.addEventListener('input', (e) => {
-      if (e.target && e.target.tagName === 'TEXTAREA') scheduleSave();
+      fileInput.value = '';
     });
   }
 
   // Init base evidence page
   initEvidencePage(document.getElementById('evidencePage'));
 
-  // Restore any saved draft for this device/browser
-  restoreFromStorage();
-
-  // Autosave on edits
-  form.addEventListener('input', scheduleSave, true);
-  form.addEventListener('change', scheduleSave, true);
-
-  /* ----- Templates for dynamic pages ----- */
-  const traverseTemplate = `
-    <div class="form-page traverse-page">
+  /* =============================
+     DYNAMIC PAGES
+  ============================== */
+  const traverseTemplate = () => `
+    <div class="form-page traverse-page" data-page-type="traverse">
       <div class="page-title">Traverse Notes and Point List (Additional)</div>
       <div class="section">
         <div class="section-title">Set Up</div>
@@ -783,11 +805,15 @@
           </tbody>
         </table>
       </div>
+      <div class="btn-row">
+        <button type="button" class="btn-secondary remove-page-btn">Remove This Page</button>
+      </div>
     </div>`;
 
-  const evidenceTemplate = `
-    <div class="form-page evidence-page">
+  const evidenceTemplate = () => `
+    <div class="form-page evidence-page" data-page-type="evidence">
       <div class="page-title">Evidence Report (Additional)</div>
+
       <div class="section">
         <div class="section-title">Evidence Details</div>
         <div class="grid-2">
@@ -803,15 +829,12 @@
         </div>
         <div class="mt-10"><label>If Not Found – Extent of Search</label><textarea name="evidence_extent_search_extra[]"></textarea></div>
       </div>
+
       <div class="section">
         <div class="section-title">Proximities from Pin</div>
         <table>
           <thead>
-            <tr>
-              <th style="width:22%;">Distance (m)</th>
-              <th style="width:28%;">Direction to Object</th>
-              <th>Object</th>
-            </tr>
+            <tr><th style="width:22%;">Distance (m)</th><th style="width:28%;">Direction to Object</th><th>Object</th></tr>
           </thead>
           <tbody>
             ${Array.from({length:5}).map((_,i)=>`
@@ -823,6 +846,7 @@
           </tbody>
         </table>
       </div>
+
       <div class="section">
         <div class="section-title">Evidence Photos</div>
         <div class="section-subtext">Attach images for this additional evidence entry.</div>
@@ -832,51 +856,141 @@
           <div class="photo-grid"></div>
         </div>
       </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn-secondary remove-page-btn">Remove This Page</button>
+      </div>
     </div>`;
 
-  function addPage(template, isEvidence) {
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = template.trim();
-    const pageEl = wrapper.firstElementChild;
-    extraPages.appendChild(pageEl);
-    if (isEvidence) initEvidencePage(pageEl);
-    scheduleSave();
+  function wireRemovePageButton(pageEl) {
+    const btn = pageEl.querySelector('.remove-page-btn');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      pageEl.remove();
+      saveNow();
+    });
   }
 
+  function addPage(templateFn, isEvidence) {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = templateFn().trim();
+    const pageEl = wrapper.firstElementChild;
+    extraPages.appendChild(pageEl);
 
+    wireRemovePageButton(pageEl);
+    if (isEvidence) initEvidencePage(pageEl);
+
+    // Listen to new fields
+    bindAutosaveToFields(pageEl);
+
+    saveNow();
+  }
 
   if (addTraverse) addTraverse.addEventListener('click', () => addPage(traverseTemplate, false));
   if (addEvidence) addEvidence.addEventListener('click', () => addPage(evidenceTemplate, true));
 
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      form.reset();
-      extraPages.innerHTML = "";
-      document.querySelectorAll('.photo-grid').forEach(grid => grid.innerHTML = "");
-      try { localStorage.removeItem(STORAGE_KEY); } catch {}
+  /* =============================
+     AUTOSAVE BINDING
+  ============================== */
+  function bindAutosaveToFields(root) {
+    const scope = root || document;
+    const inputs = Array.from(scope.querySelectorAll('input, textarea, select'))
+      .filter(el => el.type !== 'file');
+
+    inputs.forEach(el => {
+      const evt = (el.tagName === 'SELECT' || el.type === 'checkbox' || el.type === 'radio' || el.type === 'date')
+        ? 'change'
+        : 'input';
+      el.addEventListener(evt, saveSoon);
     });
   }
 
-  // Helper: compress/scale an <img> into a smaller JPEG dataURL
-  function getScaledImageDataURL(img, maxPx = 1400, quality = 0.75) {
-    const iw = img.naturalWidth  || img.width;
-    const ih = img.naturalHeight || img.height;
-    if (!iw || !ih) return img.src;
+  bindAutosaveToFields(document);
 
-    const maxSide = Math.max(iw, ih);
-    const scale   = maxSide > maxPx ? (maxPx / maxSide) : 1;
-    const w       = Math.round(iw * scale);
-    const h       = Math.round(ih * scale);
+  /* =============================
+     RESTORE
+  ============================== */
+  function restoreFromSaved() {
+    const saved = safeJsonParse(localStorage.getItem(STORAGE_KEY));
+    if (!saved || !saved.fields) return;
 
-    const canvas = document.createElement('canvas');
-    canvas.width  = w;
-    canvas.height = h;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, w, h);
-    return canvas.toDataURL('image/jpeg', quality);
+    // Rebuild extra pages
+    extraPages.innerHTML = '';
+    const types = Array.isArray(saved.extraPageTypes) ? saved.extraPageTypes : [];
+    types.forEach(t => {
+      if (t === 'traverse') addPage(traverseTemplate, false);
+      else if (t === 'evidence') addPage(evidenceTemplate, true);
+      // saveNow() is called by addPage; we'll avoid spam by temporarily silencing below
+    });
+
+    // Apply field values
+    const grouped = Object.create(null);
+    const all = Array.from(form.querySelectorAll('input, textarea, select')).filter(el => el.name && el.type !== 'file');
+    all.forEach(el => {
+      (grouped[el.name] ||= []).push(el);
+    });
+
+    (saved.fields || []).forEach(rec => {
+      const list = grouped[rec.name];
+      if (!list || !list[rec.idx]) return;
+      const el = list[rec.idx];
+      if (rec.kind === 'checkbox' || rec.kind === 'radio') {
+        el.checked = !!rec.checked;
+      } else {
+        el.value = rec.value ?? '';
+      }
+    });
+
+    // Restore photos per evidence page
+    const evidencePages = Array.from(document.querySelectorAll('.evidence-page'));
+    const photosByPage = Array.isArray(saved.photos) ? saved.photos : [];
+
+    evidencePages.forEach((page, i) => {
+      const grid = page.querySelector('.photo-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const items = Array.isArray(photosByPage[i]) ? photosByPage[i] : [];
+      items.forEach(p => {
+        if (!p || !p.imgData) return;
+        makePhotoCard(grid, p.imgData, p.caption || '');
+      });
+    });
+
+    showBadge('Restored');
   }
 
-  // Build jsPDF document (all pages + photo appendix)
+  // Prevent addPage() from saving over the restore mid-flight
+  const _saveNow = saveNow;
+  let restoring = false;
+  saveNow = function () { if (!restoring) _saveNow(); };
+
+  restoring = true;
+  restoreFromSaved();
+  restoring = false;
+
+  // One final save after restore, to normalize any structure
+  _saveNow();
+
+  /* =============================
+     RESET
+  ============================== */
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      const ok = confirm('Reset the form and clear the saved draft on this device?');
+      if (!ok) return;
+
+      form.reset();
+      extraPages.innerHTML = '';
+      document.querySelectorAll('.photo-grid').forEach(grid => grid.innerHTML = '');
+      clearSaved();
+      showBadge('Cleared');
+    });
+  }
+
+  /* =============================
+     PDF GENERATION
+  ============================== */
   async function generatePdfDoc() {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'letter');
@@ -886,29 +1000,33 @@
     const pdfHeight = pdf.internal.pageSize.getHeight();
     let isFirst = true;
 
-    // 1) REPORT PAGES (one per PDF page, including extra pages)
+    // REPORT PAGES
     for (let i = 0; i < allPages.length; i++) {
-      // Clone the full container offscreen for clean capture
       const clone = container.cloneNode(true);
       clone.style.position = 'absolute';
       clone.style.left = '-9999px';
       clone.style.top  = '0';
       document.body.appendChild(clone);
 
-      // Copy field values from real form to cloned form
-      const origFields  = container.querySelectorAll('input, textarea, select');
-      const cloneFields = clone.querySelectorAll('input, textarea, select');
+      // Copy field values from real form to cloned form by (name, idx)
+      const origFields  = Array.from(container.querySelectorAll('input, textarea, select')).filter(el => el.type !== 'file');
+      const cloneFields = Array.from(clone.querySelectorAll('input, textarea, select')).filter(el => el.type !== 'file');
 
-      cloneFields.forEach((field, idx) => {
-        const orig = origFields[idx];
-        if (!orig) return;
+      // Build map name->list for original and clone, then copy matching index
+      const origMap = {};
+      const cloneMap = {};
+      origFields.forEach(el => (origMap[el.name] ||= []).push(el));
+      cloneFields.forEach(el => (cloneMap[el.name] ||= []).push(el));
 
-        if (field.type === 'checkbox' || field.type === 'radio') {
-          field.checked = orig.checked;
-        } else if (field.tagName === 'SELECT') {
-          field.value = orig.value;
-        } else {
-          field.value = orig.value;
+      Object.keys(origMap).forEach(name => {
+        const oList = origMap[name] || [];
+        const cList = cloneMap[name] || [];
+        for (let k = 0; k < Math.min(oList.length, cList.length); k++) {
+          const o = oList[k];
+          const c = cList[k];
+          if (!o || !c) continue;
+          if (c.type === 'checkbox' || c.type === 'radio') c.checked = o.checked;
+          else c.value = o.value;
         }
       });
 
@@ -918,63 +1036,49 @@
         page.style.display = (idx === i) ? 'block' : 'none';
       });
 
-      // Hide all form control button rows in the clone
-      clone.querySelectorAll('.btn-row, .btn-row-controls').forEach(row => {
+      // Hide buttons/badge in clone
+      clone.querySelectorAll('.btn-row, .btn-row-controls, .save-badge').forEach(row => {
         row.style.display = 'none';
       });
 
-      const canvas = await html2canvas(clone, {
-        scale: 2,
-        useCORS: true
-      });
-
+      const canvas = await html2canvas(clone, { scale: 2, useCORS: true });
       const imgData = canvas.toDataURL('image/jpeg', 0.9);
-      let imgWidth  = canvas.width;
-      let imgHeight = canvas.height;
-      const scale   = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
 
-      imgWidth  *= scale;
-      imgHeight *= scale;
+      let imgW = canvas.width;
+      let imgH = canvas.height;
+      const scale = Math.min(pdfWidth / imgW, pdfHeight / imgH);
+      imgW *= scale;
+      imgH *= scale;
 
-      const x = (pdfWidth  - imgWidth)  / 2;
-      const y = (pdfHeight - imgHeight) / 2;
+      const x = (pdfWidth - imgW) / 2;
+      const y = (pdfHeight - imgH) / 2;
 
       if (!isFirst) pdf.addPage();
       isFirst = false;
+      pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH);
 
-      pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
-
-      // Clean up clone
       document.body.removeChild(clone);
     }
 
-    // 2) LARGE PHOTO PAGES – 4 per page with descriptions
-    const photoImgs = Array.from(document.querySelectorAll('.photo-grid img'));
+    // PHOTO APPENDIX (4 per page)
+    const photoImgs = Array.from(document.querySelectorAll('.photo-grid img')).filter(img => img.src);
     if (photoImgs.length > 0) {
       const margin    = 10;
       const availW    = pdfWidth  - margin * 2;
       const availH    = pdfHeight - margin * 2;
 
-      // Build array of { img, desc }
       const photos = photoImgs.map((img, idx) => {
         const card = img.closest('.photo-card');
-        let desc = "";
-        if (card) {
-          const textarea = card.querySelector('textarea');
-          if (textarea && textarea.value.trim() !== "") {
-            desc = textarea.value.trim();
-          }
-        }
-        if (!desc) desc = `Photo ${idx + 1}`;
+        const textarea = card ? card.querySelector('textarea') : null;
+        const desc = (textarea && textarea.value.trim()) ? textarea.value.trim() : `Photo ${idx + 1}`;
         return { img, desc };
       });
 
-      const perPage = 4; // 4 photos per appendix page
-      const cols = 2;
-      const rows = 2;
+      const perPage = 4;
+      const cols = 2, rows = 2;
       const cellW = availW / cols;
       const cellH = availH / rows;
-      const captionHeight = 6; // mm reserved for text under each photo
+      const captionH = 6;
 
       for (let i = 0; i < photos.length; i += perPage) {
         const pagePhotos = photos.slice(i, i + perPage);
@@ -995,22 +1099,20 @@
           const iw = p.img.naturalWidth || p.img.width || 800;
           const ih = p.img.naturalHeight || p.img.height || 600;
 
-          const imgAvailH = cellH - captionHeight - 2;
-          const scale     = Math.min((cellW - 4) / iw, imgAvailH / ih);
-          const drawW     = iw * scale;
-          const drawH     = ih * scale;
+          const imgAvailH = cellH - captionH - 2;
+          const sc = Math.min((cellW - 4) / iw, imgAvailH / ih);
+          const drawW = iw * sc;
+          const drawH = ih * sc;
 
           const imgX = cellX + (cellW - drawW) / 2;
           const imgY = cellY + 2;
 
           pdf.addImage(dataUrl, 'JPEG', imgX, imgY, drawW, drawH);
 
-          // Caption
           pdf.setFontSize(9);
           const captionY = imgY + drawH + 3;
           const captionX = cellX + 2;
-          const maxCaptionWidth = cellW - 4;
-          pdf.text(p.desc, captionX, captionY, { maxWidth: maxCaptionWidth });
+          pdf.text(p.desc, captionX, captionY, { maxWidth: cellW - 4 });
         });
       }
     }
@@ -1020,39 +1122,36 @@
 
   async function handlePdfAction(action) {
     try {
+      saveNow(); // make sure latest is saved before export
       const pdf = await generatePdfDoc();
+      const filename = buildDefaultPdfName();
 
       if (action === 'download') {
-        pdf.save(buildDefaultPdfFilename());
-      } else if (action === 'share') {
-        const fileName = buildDefaultPdfFilename();
-        const arrayBuf = pdf.output('arraybuffer');
-        const blob = new Blob([arrayBuf], { type: 'application/pdf' });
+        pdf.save(filename);
+        return;
+      }
 
-        // Prefer Web Share API with files (iOS / modern mobile)
-        if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'application/pdf' })] })) {
-          const file = new File([blob], fileName, { type: 'application/pdf' });
-          await navigator.share({
-            files: [file],
-            title: 'Evidence Report',
-            text: 'Vista Geomatics Evidence Report'
-          });
-        } else if (navigator.share) {
-          // Fallback: share a blob URL if possible
-          const blobUrl = URL.createObjectURL(blob);
-          try {
-            await navigator.share({
-              title: 'Evidence Report',
-              text: 'Evidence Report PDF',
-              url: blobUrl
-            });
-          } finally {
-            URL.revokeObjectURL(blobUrl);
-          }
-        } else {
-          // If share not supported, just download
-          pdf.save(buildDefaultPdfFilename());
+      // SHARE
+      const arrayBuf = pdf.output('arraybuffer');
+      const blob = new Blob([arrayBuf], { type: 'application/pdf' });
+
+      const file = new File([blob], filename, { type: 'application/pdf' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Evidence Report',
+          text: 'Vista Geomatics Evidence Report'
+        });
+      } else if (navigator.share) {
+        const blobUrl = URL.createObjectURL(blob);
+        try {
+          await navigator.share({ title: 'Evidence Report', text: 'Evidence Report PDF', url: blobUrl });
+        } finally {
+          URL.revokeObjectURL(blobUrl);
         }
+      } else {
+        pdf.save(filename);
       }
     } catch (err) {
       console.error('PDF generation/share error:', err);
@@ -1060,12 +1159,9 @@
     }
   }
 
-  if (downloadBtn) {
-    downloadBtn.addEventListener('click', () => handlePdfAction('download'));
-  }
-  if (shareBtn) {
-    shareBtn.addEventListener('click', () => handlePdfAction('share'));
-  }
+  if (downloadBtn) downloadBtn.addEventListener('click', () => handlePdfAction('download'));
+  if (shareBtn) shareBtn.addEventListener('click', () => handlePdfAction('share'));
+
 })();
 </script>
 </body>
