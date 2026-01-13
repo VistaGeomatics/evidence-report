@@ -579,6 +579,134 @@
   const form         = document.getElementById('evidenceForm');
   const container    = document.querySelector('.container');
 
+  /* =========================
+     PERSISTENCE (localStorage)
+     - Saves all form fields, extra pages, and photo grids
+     - Restores on load on same device/browser
+  ========================== */
+  const STORAGE_KEY = 'vista_evidence_report_autosave_v1';
+
+  function safeJsonParse(str) {
+    try { return JSON.parse(str); } catch { return null; }
+  }
+
+  function sanitizeFilenamePart(str) {
+    return (str || '')
+      .toString()
+      .trim()
+      .replace(/\s+/g, ' ')
+      .replace(/[\\/:*?"<>|]+/g, '')   // remove illegal filename chars
+      .replace(/[\u0000-\u001F]+/g, '') // remove control chars
+      .trim();
+  }
+
+  function getTodayISO() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function buildDefaultPdfFilename() {
+    const jobNo = sanitizeFilenamePart(form.querySelector('[name="job_no"]')?.value);
+    const crew  = sanitizeFilenamePart(form.querySelector('[name="crew_chief"]')?.value);
+    const date  = getTodayISO();
+
+    const parts = ['EvidenceReport'];
+    if (jobNo) parts.push(jobNo);
+    if (crew)  parts.push(crew);
+    parts.push(date);
+
+    return parts.join('_') + '.pdf';
+  }
+
+  function snapshotFields() {
+    const fields = Array.from(container.querySelectorAll('input, textarea, select'));
+    return fields.map(f => {
+      if (f.type === 'checkbox' || f.type === 'radio') {
+        return { t: f.type, v: !!f.checked };
+      }
+      // file inputs cannot be restored; photos are stored via DOM HTML instead
+      if (f.type === 'file') {
+        return { t: 'file', v: null };
+      }
+      return { t: f.tagName, v: f.value };
+    });
+  }
+
+  function applyFieldsSnapshot(fieldSnap) {
+    const fields = Array.from(container.querySelectorAll('input, textarea, select'));
+    fields.forEach((f, i) => {
+      const snap = fieldSnap?.[i];
+      if (!snap) return;
+
+      if (f.type === 'checkbox' || f.type === 'radio') {
+        f.checked = !!snap.v;
+      } else if (f.type === 'file') {
+        // cannot restore file input value
+      } else {
+        f.value = snap.v ?? '';
+      }
+    });
+  }
+
+  function getBaseEvidencePhotoGrid() {
+    const base = document.getElementById('evidencePage');
+    return base?.querySelector('.photo-grid') || null;
+  }
+
+  function saveToStorage() {
+    const payload = {
+      v: 1,
+      savedAt: Date.now(),
+      extraPagesHTML: extraPages.innerHTML,
+      baseEvidencePhotosHTML: (getBaseEvidencePhotoGrid()?.innerHTML) || '',
+      fields: snapshotFields()
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+      // If storage is full (lots of photos), fail quietly rather than breaking the form
+      console.warn('Autosave failed:', e);
+    }
+  }
+
+  function restoreFromStorage() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+
+    const payload = safeJsonParse(raw);
+    if (!payload || payload.v !== 1) return;
+
+    // Restore extra pages first so field order matches snapshot
+    if (typeof payload.extraPagesHTML === 'string') {
+      extraPages.innerHTML = payload.extraPagesHTML;
+    }
+
+    // Re-init evidence pages (base + restored)
+    document.querySelectorAll('.form-page.evidence-page').forEach(p => initEvidencePage(p));
+
+    // Restore base evidence photos
+    const grid = getBaseEvidencePhotoGrid();
+    if (grid && typeof payload.baseEvidencePhotosHTML === 'string') {
+      grid.innerHTML = payload.baseEvidencePhotosHTML;
+    }
+
+    // Apply field values
+    if (Array.isArray(payload.fields)) {
+      applyFieldsSnapshot(payload.fields);
+    }
+  }
+
+  // Debounced autosave
+  let saveTimer = null;
+  function scheduleSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveToStorage, 250);
+  }
+
+
   /* ----- Evidence Photos (init for any evidence page) ----- */
   function initEvidencePage(pageEl) {
     const addPhotoBtn = pageEl.querySelector('.add-photo-btn');
@@ -611,11 +739,24 @@
         reader.readAsDataURL(file);
       });
       fileInput.value = "";
+      scheduleSave();
+    });
+
+    // Save when captions are edited
+    photoGrid.addEventListener('input', (e) => {
+      if (e.target && e.target.tagName === 'TEXTAREA') scheduleSave();
     });
   }
 
   // Init base evidence page
   initEvidencePage(document.getElementById('evidencePage'));
+
+  // Restore any saved draft for this device/browser
+  restoreFromStorage();
+
+  // Autosave on edits
+  form.addEventListener('input', scheduleSave, true);
+  form.addEventListener('change', scheduleSave, true);
 
   /* ----- Templates for dynamic pages ----- */
   const traverseTemplate = `
@@ -699,7 +840,10 @@
     const pageEl = wrapper.firstElementChild;
     extraPages.appendChild(pageEl);
     if (isEvidence) initEvidencePage(pageEl);
+    scheduleSave();
   }
+
+
 
   if (addTraverse) addTraverse.addEventListener('click', () => addPage(traverseTemplate, false));
   if (addEvidence) addEvidence.addEventListener('click', () => addPage(evidenceTemplate, true));
@@ -709,6 +853,7 @@
       form.reset();
       extraPages.innerHTML = "";
       document.querySelectorAll('.photo-grid').forEach(grid => grid.innerHTML = "");
+      try { localStorage.removeItem(STORAGE_KEY); } catch {}
     });
   }
 
@@ -878,14 +1023,15 @@
       const pdf = await generatePdfDoc();
 
       if (action === 'download') {
-        pdf.save('EvidenceReport.pdf');
+        pdf.save(buildDefaultPdfFilename());
       } else if (action === 'share') {
+        const fileName = buildDefaultPdfFilename();
         const arrayBuf = pdf.output('arraybuffer');
         const blob = new Blob([arrayBuf], { type: 'application/pdf' });
 
         // Prefer Web Share API with files (iOS / modern mobile)
-        if (navigator.canShare && navigator.canShare({ files: [new File([blob], 'EvidenceReport.pdf', { type: 'application/pdf' })] })) {
-          const file = new File([blob], 'EvidenceReport.pdf', { type: 'application/pdf' });
+        if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'application/pdf' })] })) {
+          const file = new File([blob], fileName, { type: 'application/pdf' });
           await navigator.share({
             files: [file],
             title: 'Evidence Report',
@@ -905,7 +1051,7 @@
           }
         } else {
           // If share not supported, just download
-          pdf.save('EvidenceReport.pdf');
+          pdf.save(buildDefaultPdfFilename());
         }
       }
     } catch (err) {
