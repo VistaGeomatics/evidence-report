@@ -566,6 +566,120 @@
   'use strict';
 
   /* =============================
+     IMAGE COMPRESSION
+     Compresses a File/Blob to JPEG before storage.
+     Max long-side: 1400px, quality: 0.72 — roughly 150–300 KB per photo.
+  ============================== */
+  function compressImage(file, maxPx, quality) {
+    maxPx   = maxPx   || 1400;
+    quality = quality || 0.72;
+    return new Promise(function (resolve) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var img = new Image();
+        img.onload = function () {
+          var iw = img.width, ih = img.height;
+          var scale = (Math.max(iw, ih) > maxPx) ? (maxPx / Math.max(iw, ih)) : 1;
+          var w = Math.round(iw * scale), h = Math.round(ih * scale);
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* =============================
+     INDEXEDDB PHOTO STORE
+     Photos are stored here instead of localStorage to avoid the ~5 MB quota.
+     Schema: DB "VistaPhotoDB" v1, object store "photos", key = pageKey (string),
+     value = array of { imgData, caption }.
+  ============================== */
+  var PhotoDB = (function () {
+    var DB_NAME    = 'VistaPhotoDB';
+    var DB_VERSION = 1;
+    var STORE      = 'photos';
+    var _db        = null;
+
+    function open() {
+      return new Promise(function (resolve, reject) {
+        if (_db) { resolve(_db); return; }
+        var req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = function (e) {
+          e.target.result.createObjectStore(STORE);
+        };
+        req.onsuccess = function (e) { _db = e.target.result; resolve(_db); };
+        req.onerror   = function (e) { reject(e.target.error); };
+      });
+    }
+
+    function tx(mode) {
+      return open().then(function (db) {
+        return db.transaction(STORE, mode).objectStore(STORE);
+      });
+    }
+
+    function set(key, value) {
+      return tx('readwrite').then(function (store) {
+        return new Promise(function (resolve, reject) {
+          var r = store.put(value, key);
+          r.onsuccess = resolve; r.onerror = function (e) { reject(e.target.error); };
+        });
+      });
+    }
+
+    function get(key) {
+      return tx('readonly').then(function (store) {
+        return new Promise(function (resolve, reject) {
+          var r = store.get(key);
+          r.onsuccess = function () { resolve(r.result || []); };
+          r.onerror   = function (e) { reject(e.target.error); };
+        });
+      });
+    }
+
+    function getAllKeys() {
+      return tx('readonly').then(function (store) {
+        return new Promise(function (resolve, reject) {
+          var r = store.getAllKeys();
+          r.onsuccess = function () { resolve(r.result || []); };
+          r.onerror   = function (e) { reject(e.target.error); };
+        });
+      });
+    }
+
+    function del(key) {
+      return tx('readwrite').then(function (store) {
+        return new Promise(function (resolve, reject) {
+          var r = store.delete(key);
+          r.onsuccess = resolve; r.onerror = function (e) { reject(e.target.error); };
+        });
+      });
+    }
+
+    function clearAll() {
+      return tx('readwrite').then(function (store) {
+        return new Promise(function (resolve, reject) {
+          var r = store.clear();
+          r.onsuccess = resolve; r.onerror = function (e) { reject(e.target.error); };
+        });
+      });
+    }
+
+    return { set: set, get: get, getAllKeys: getAllKeys, del: del, clearAll: clearAll };
+  })();
+
+  /* Helper: stable page key for IndexedDB, based on DOM order */
+  function pageKeyFor(pageEl) {
+    var pages = Array.from(document.querySelectorAll('.evidence-page'));
+    var idx   = pages.indexOf(pageEl);
+    return 'evidence_page_' + (idx >= 0 ? idx : pages.length);
+  }
+
+  /* =============================
      ELEMENTS
   ============================== */
   const extraPages   = document.getElementById('extraPages');
@@ -666,11 +780,13 @@
   }
 
   function saveNow() {
+    // Photos are stored in IndexedDB (see initEvidencePage).
+    // Only text fields + page structure go in localStorage (tiny footprint).
     const payload = {
       savedAt: Date.now(),
       extraPageTypes: listExtraPageTypes(),
-      fields: listFieldRecords(),
-      photos: listPhotosByEvidencePage()
+      fields: listFieldRecords()
+      // photos intentionally omitted — stored in IndexedDB per evidence page
     };
 
     try {
@@ -726,7 +842,12 @@
     const caption = document.createElement('textarea');
     caption.placeholder = 'Photo description';
     caption.value = captionText || '';
-    caption.addEventListener('input', saveSoon);
+    caption.addEventListener('input', () => {
+      saveSoon();
+      // Also persist caption change to IndexedDB
+      const pageEl = card.closest('.evidence-page');
+      if (pageEl) savePhotosForPage(pageEl);
+    });
 
     const actions = document.createElement('div');
     actions.className = 'photo-actions';
@@ -736,8 +857,10 @@
     removeBtn.className = 'photo-remove';
     removeBtn.textContent = 'Remove';
     removeBtn.addEventListener('click', () => {
+      const pageEl = card.closest('.evidence-page');
       card.remove();
       saveNow();
+      if (pageEl) savePhotosForPage(pageEl);
     });
 
     actions.appendChild(removeBtn);
@@ -760,18 +883,33 @@
       const files = Array.from(fileInput.files || []);
       if (!files.length) return;
 
-      files.forEach(file => {
-        if (!file.type.startsWith('image/')) return;
+      // Show a brief "Processing…" badge while compressing
+      showBadge('Compressing…');
 
-        const reader = new FileReader();
-        reader.onload = e => {
-          makePhotoCard(photoGrid, e.target.result, '');
-          saveNow();
-        };
-        reader.readAsDataURL(file);
+      const compressions = files
+        .filter(f => f.type.startsWith('image/'))
+        .map(file => compressImage(file, 1400, 0.72));
+
+      Promise.all(compressions).then(dataUrls => {
+        dataUrls.forEach(dataUrl => makePhotoCard(photoGrid, dataUrl, ''));
+        savePhotosForPage(pageEl);
       });
 
       fileInput.value = '';
+    });
+  }
+
+  /* Save all photos for a given evidence page to IndexedDB */
+  function savePhotosForPage(pageEl) {
+    const key   = pageKeyFor(pageEl);
+    const cards = Array.from(pageEl.querySelectorAll('.photo-card'));
+    const items = cards.map(card => ({
+      imgData: card.querySelector('img')?.src || '',
+      caption: card.querySelector('textarea')?.value || ''
+    }));
+    PhotoDB.set(key, items).then(() => showBadge('Saved')).catch(err => {
+      console.warn('IndexedDB photo save failed', err);
+      showBadge('Photo save failed');
     });
   }
 
@@ -912,7 +1050,7 @@
   ============================== */
   function restoreFromSaved() {
     const saved = safeJsonParse(localStorage.getItem(STORAGE_KEY));
-    if (!saved || !saved.fields) return;
+    if (!saved || !saved.fields) return Promise.resolve();
 
     // Rebuild extra pages
     extraPages.innerHTML = '';
@@ -920,10 +1058,9 @@
     types.forEach(t => {
       if (t === 'traverse') addPage(traverseTemplate, false);
       else if (t === 'evidence') addPage(evidenceTemplate, true);
-      // saveNow() is called by addPage; we'll avoid spam by temporarily silencing below
     });
 
-    // Apply field values
+    // Apply text field values
     const grouped = Object.create(null);
     const all = Array.from(form.querySelectorAll('input, textarea, select')).filter(el => el.name && el.type !== 'file');
     all.forEach(el => {
@@ -941,23 +1078,22 @@
       }
     });
 
-    // Restore photos per evidence page
+    // Restore photos from IndexedDB for each evidence page
     const evidencePages = Array.from(document.querySelectorAll('.evidence-page'));
-    const photosByPage = Array.isArray(saved.photos) ? saved.photos : [];
-
-    evidencePages.forEach((page, i) => {
-      const grid = page.querySelector('.photo-grid');
-      if (!grid) return;
-      grid.innerHTML = '';
-
-      const items = Array.isArray(photosByPage[i]) ? photosByPage[i] : [];
-      items.forEach(p => {
-        if (!p || !p.imgData) return;
-        makePhotoCard(grid, p.imgData, p.caption || '');
-      });
+    const photoPromises = evidencePages.map((page, i) => {
+      const key = 'evidence_page_' + i;
+      return PhotoDB.get(key).then(items => {
+        const grid = page.querySelector('.photo-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        (items || []).forEach(p => {
+          if (p && p.imgData) makePhotoCard(grid, p.imgData, p.caption || '');
+        });
+      }).catch(err => console.warn('Photo restore failed for', key, err));
     });
 
     showBadge('Restored');
+    return Promise.all(photoPromises);
   }
 
   // Prevent addPage() from saving over the restore mid-flight
@@ -966,11 +1102,10 @@
   saveNow = function () { if (!restoring) _saveNow(); };
 
   restoring = true;
-  restoreFromSaved();
-  restoring = false;
-
-  // One final save after restore, to normalize any structure
-  _saveNow();
+  restoreFromSaved().then(() => {
+    restoring = false;
+    _saveNow();
+  });
 
   /* =============================
      RESET
@@ -984,6 +1119,7 @@
       extraPages.innerHTML = '';
       document.querySelectorAll('.photo-grid').forEach(grid => grid.innerHTML = '');
       clearSaved();
+      PhotoDB.clearAll().catch(err => console.warn('IndexedDB clear failed', err));
       showBadge('Cleared');
     });
   }
