@@ -677,6 +677,10 @@
             <div class="photo-grid"></div>
           </div>
         </div>
+
+        <div class="btn-row">
+          <button type="button" id="addEvidencePageBottom" class="btn-primary">+ Add Evidence Report Page</button>
+        </div>
       </div>
 
       <!-- EXTRA PAGES GO HERE -->
@@ -1194,6 +1198,7 @@
 
       <div class="btn-row">
         <button type="button" class="btn-secondary remove-page-btn">Remove This Page</button>
+        <button type="button" class="btn-primary add-evidence-bottom-btn">+ Add Evidence Report Page</button>
       </div>
     </div>`;
 
@@ -1206,6 +1211,12 @@
     });
   }
 
+  function wireAddEvidenceBottomButton(pageEl) {
+    const btn = pageEl.querySelector('.add-evidence-bottom-btn');
+    if (!btn) return;
+    btn.addEventListener('click', () => addPage(evidenceTemplate, true));
+  }
+
   function addPage(templateFn, isEvidence) {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = templateFn().trim();
@@ -1213,7 +1224,11 @@
     extraPages.appendChild(pageEl);
 
     wireRemovePageButton(pageEl);
+    wireAddEvidenceBottomButton(pageEl);
     if (isEvidence) initEvidencePage(pageEl);
+
+    // Scroll new page into view
+    pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     // Listen to new fields
     bindAutosaveToFields(pageEl);
@@ -1223,6 +1238,10 @@
 
   if (addTraverse) addTraverse.addEventListener('click', () => addPage(traverseTemplate, false));
   if (addEvidence) addEvidence.addEventListener('click', () => addPage(evidenceTemplate, true));
+
+  // Wire the bottom add evidence button on the base evidence page
+  const addEvidenceBottom = document.getElementById('addEvidencePageBottom');
+  if (addEvidenceBottom) addEvidenceBottom.addEventListener('click', () => addPage(evidenceTemplate, true));
 
   /* =============================
      AUTOSAVE BINDING
@@ -1353,153 +1372,475 @@
   function tick() { return new Promise(r => setTimeout(r, 0)); }
 
   /* =============================
-     PDF GENERATION (batched)
+     PDF GENERATION — Programmatic professional layout
   ============================== */
   async function generatePdfDoc() {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'letter');
+    const W  = pdf.internal.pageSize.getWidth();   // 215.9
+    const H  = pdf.internal.pageSize.getHeight();  // 279.4
+    const ML = 14, MR = 14, MT = 0, MB = 12;
+    const CW = W - ML - MR;
 
-    const allPages = Array.from(document.querySelectorAll('.form-page'));
-    const pdfWidth  = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+    // Brand colours (R,G,B)
+    const DARK  = [11,  48,  69];
+    const MID   = [22,  95, 125];
+    const LIGHT = [42, 127, 163];
+    const RULED = [198, 212, 229];
+    const BGCELL= [245, 249, 253];
 
-    // Collect photos before we start so we have an accurate total
-    const photoImgs = Array.from(document.querySelectorAll('.photo-grid img')).filter(img => img.src);
-    const totalSteps = allPages.length + photoImgs.length;
-    let stepsDone = 0;
+    // Collect photos upfront
+    const photoImgs  = Array.from(document.querySelectorAll('.photo-grid img')).filter(img => img.src && img.src.startsWith('data:'));
+    const allPages   = Array.from(document.querySelectorAll('.form-page'));
+    const totalSteps = allPages.length + photoImgs.length + 1;
+    let   stepsDone  = 0;
+    let   pageNum    = 0;
 
-    // ---- REPORT FORM PAGES ----
-    for (let i = 0; i < allPages.length; i++) {
-      updateProgress(stepsDone, totalSteps, `Rendering form page ${i + 1} of ${allPages.length}…`);
-      await tick();
+    // ── helpers ──────────────────────────────────────────────────────────────
 
-      const clone = container.cloneNode(true);
-      clone.style.position = 'absolute';
-      clone.style.left = '-9999px';
-      clone.style.top  = '0';
-      document.body.appendChild(clone);
+    function v(el, name) {
+      const f = el.querySelector(`[name="${name}"]`);
+      return f ? (f.value || '').trim() : '';
+    }
 
-      // Copy field values
-      const origFields  = Array.from(container.querySelectorAll('input, textarea, select')).filter(el => el.type !== 'file');
-      const cloneFields = Array.from(clone.querySelectorAll('input, textarea, select')).filter(el => el.type !== 'file');
-      const origMap = {}, cloneMap = {};
-      origFields.forEach(el  => (origMap[el.name]  ||= []).push(el));
-      cloneFields.forEach(el => (cloneMap[el.name] ||= []).push(el));
-      Object.keys(origMap).forEach(name => {
-        const oList = origMap[name] || [], cList = cloneMap[name] || [];
-        for (let k = 0; k < Math.min(oList.length, cList.length); k++) {
-          const o = oList[k], c = cList[k];
-          if (!o || !c) continue;
-          if (c.type === 'checkbox' || c.type === 'radio') c.checked = o.checked;
-          else c.value = o.value;
+    function addNewPage() {
+      if (pageNum > 0) pdf.addPage();
+      pageNum++;
+    }
+
+    // Gradient header bar (redrawn on every page)
+    function drawPageHeader(titleLeft, titleRight) {
+      // Deep blue gradient band
+      pdf.setFillColor(...DARK);
+      pdf.rect(0, 0, W, 16, 'F');
+      // Lighter accent strip on right
+      pdf.setFillColor(...MID);
+      pdf.rect(W * 0.55, 0, W * 0.45, 16, 'F');
+      // Company name
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(11);
+      pdf.setTextColor(255, 255, 255);
+      pdf.text('VISTA', ML, 10.5);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('GEOMATICS', ML + pdf.getTextWidth('VISTA') + 0.8, 10.5);
+      // Right side: page title
+      if (titleRight) {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(8);
+        pdf.setTextColor(200, 225, 240);
+        pdf.text(titleRight.toUpperCase(), W - MR, 10.5, { align: 'right' });
+      }
+      // Thin accent line under header
+      pdf.setDrawColor(...LIGHT);
+      pdf.setLineWidth(0.4);
+      pdf.line(0, 16, W, 16);
+    }
+
+    function drawPageFooter(pageLabel) {
+      const y = H - 7;
+      pdf.setDrawColor(...RULED);
+      pdf.setLineWidth(0.3);
+      pdf.line(ML, y - 2, W - MR, y - 2);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(7);
+      pdf.setTextColor(120, 140, 155);
+      pdf.text('Vista Geomatics — Evidence Report', ML, y + 1);
+      if (pageLabel) pdf.text(pageLabel, W - MR, y + 1, { align: 'right' });
+    }
+
+    function drawSectionBar(y, title) {
+      pdf.setFillColor(...DARK);
+      pdf.rect(ML, y, CW, 6.5, 'F');
+      // Left accent stripe
+      pdf.setFillColor(...LIGHT);
+      pdf.rect(ML, y, 2, 6.5, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(8);
+      pdf.setTextColor(255, 255, 255);
+      pdf.text(title.toUpperCase(), ML + 4, y + 4.5);
+      return y + 6.5;
+    }
+
+    // Draw a labelled field: label above, value in ruled box
+    function drawField(x, y, w, label, value, opts) {
+      opts = opts || {};
+      const lh = opts.multiline ? 0 : 4.5;
+      const bh = opts.multiline ? (opts.boxH || 16) : 7.5;
+      // Label
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(6.5);
+      pdf.setTextColor(...DARK);
+      pdf.text(label.toUpperCase(), x, y + 3.5);
+      // Box
+      const by = y + lh;
+      pdf.setFillColor(...BGCELL);
+      pdf.setDrawColor(...RULED);
+      pdf.setLineWidth(0.25);
+      pdf.roundedRect(x, by, w, bh, 1, 1, 'FD');
+      // Value text
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8.5);
+      pdf.setTextColor(20, 30, 40);
+      if (value) {
+        if (opts.multiline) {
+          const lines = pdf.splitTextToSize(value, w - 4);
+          pdf.text(lines, x + 2, by + 5, { maxWidth: w - 4 });
+        } else {
+          pdf.text(value, x + 2, by + 5, { maxWidth: w - 4 });
         }
+      }
+      return by + bh;
+    }
+
+    // Draw a simple 2-col grid of fields; returns new Y
+    function drawFieldGrid(y, fields, cols) {
+      cols = cols || 2;
+      const gap = 3;
+      const fw  = (CW - gap * (cols - 1)) / cols;
+      let maxY  = y;
+      fields.forEach((f, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        if (col === 0 && i > 0) maxY += (f.multiline ? (f.boxH || 16) : 12) + 2;
+        const x = ML + col * (fw + gap);
+        const thisY = i < cols ? y : maxY;
+        const bottom = drawField(x, thisY, fw, f.label, f.value, { multiline: f.multiline, boxH: f.boxH });
+        if (i < cols) maxY = Math.max(maxY, bottom);
       });
+      return maxY + 3;
+    }
 
-      // Show only this page
-      clone.querySelectorAll('.form-page').forEach((page, idx) => {
-        page.style.display = (idx === i) ? 'block' : 'none';
+    // Table: headers array, rows array-of-arrays, colWidths array (fractions of CW)
+    function drawTable(y, headers, rows, colFracs) {
+      const TH = 6.5, RH = 7;
+      const cols = headers.length;
+      const cw   = colFracs ? colFracs.map(f => f * CW) : Array(cols).fill(CW / cols);
+      // Header row
+      pdf.setFillColor(...DARK);
+      pdf.rect(ML, y, CW, TH, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(7);
+      pdf.setTextColor(255, 255, 255);
+      let cx = ML;
+      headers.forEach((h, i) => {
+        pdf.text(h.toUpperCase(), cx + 2, y + 4.5, { maxWidth: cw[i] - 3 });
+        cx += cw[i];
       });
-      clone.querySelectorAll('.btn-row, .btn-row-controls, .save-badge').forEach(el => {
-        el.style.display = 'none';
+      // Data rows
+      rows.forEach((row, ri) => {
+        const ry = y + TH + ri * RH;
+        pdf.setFillColor(ri % 2 === 0 ? 250 : 243, ri % 2 === 0 ? 252 : 247, 255);
+        pdf.rect(ML, ry, CW, RH, 'F');
+        pdf.setDrawColor(...RULED);
+        pdf.setLineWidth(0.2);
+        pdf.rect(ML, ry, CW, RH, 'S');
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(8);
+        pdf.setTextColor(20, 30, 40);
+        let cx2 = ML;
+        row.forEach((cell, ci) => {
+          if (cell) pdf.text(String(cell), cx2 + 2, ry + 5, { maxWidth: cw[ci] - 3 });
+          cx2 += cw[ci];
+          // column divider
+          if (ci < row.length - 1) {
+            pdf.setDrawColor(...RULED);
+            pdf.line(cx2, ry, cx2, ry + RH);
+          }
+        });
       });
+      return y + TH + rows.length * RH + 3;
+    }
 
-      const canvas = await html2canvas(clone, { scale: 2, useCORS: true, logging: false });
-      // Release clone immediately to free memory
-      document.body.removeChild(clone);
+    // ── PAGE: Title Page ──────────────────────────────────────────────────────
+    updateProgress(stepsDone, totalSteps, 'Building Title Page…');
+    await tick();
+    {
+      const tp = document.getElementById('titlePage');
+      addNewPage();
+      drawPageHeader('Vista Geomatics', 'Evidence Report');
+      drawPageFooter(`Page ${pageNum}`);
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.88);
-      // Null the canvas reference so GC can collect it
-      canvas.width = canvas.height = 0;
+      // Page title banner
+      let y = 20;
+      pdf.setFillColor(...BGCELL);
+      pdf.rect(ML, y, CW, 10, 'F');
+      pdf.setDrawColor(...RULED);
+      pdf.setLineWidth(0.3);
+      pdf.rect(ML, y, CW, 10, 'S');
+      // Left colour bar
+      pdf.setFillColor(...MID);
+      pdf.rect(ML, y, 3, 10, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(13);
+      pdf.setTextColor(...DARK);
+      pdf.text('EVIDENCE REPORT', ML + 6, y + 7);
+      const jn = v(tp, 'job_no');
+      if (jn) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        pdf.setTextColor(...MID);
+        pdf.text(`Job No: ${jn}`, W - MR, y + 7, { align: 'right' });
+      }
+      y += 14;
 
-      let imgW = canvas.width || 1, imgH = canvas.height || 1;
-      // Re-read from imgData dimensions via a temp image
-      await new Promise(res => {
-        const tmp = new Image();
-        tmp.onload = () => {
-          imgW = tmp.width; imgH = tmp.height;
-          const sc = Math.min(pdfWidth / imgW, pdfHeight / imgH);
-          imgW *= sc; imgH *= sc;
-          const x = (pdfWidth  - imgW) / 2;
-          const y = (pdfHeight - imgH) / 2;
-          if (i > 0) pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH);
-          res();
-        };
-        tmp.src = imgData;
-      });
+      // Job Details section
+      y = drawSectionBar(y, 'Job Details') + 3;
+      y = drawFieldGrid(y, [
+        { label: 'Job No.',         value: v(tp,'job_no') },
+        { label: 'Client',          value: v(tp,'client') },
+        { label: 'Client Contact',  value: v(tp,'client_contact') },
+        { label: 'Job Description', value: v(tp,'job_description') },
+        { label: 'Crew Chief',      value: v(tp,'crew_chief') },
+        { label: 'Assistant',       value: v(tp,'assistant') },
+        { label: 'Start Date',      value: v(tp,'start_date') },
+        { label: 'End Date',        value: v(tp,'end_date') },
+        { label: 'Project Manager', value: v(tp,'project_manager') },
+        { label: 'Land Surveyor',   value: v(tp,'land_surveyor') },
+        { label: 'Location',        value: v(tp,'location') },
+      ], 2) + 2;
 
+      // Client instructions
+      const instr = v(tp, 'job_instructions');
+      if (true) { // always show
+        y = drawSectionBar(y, 'Job Details and Client Instructions') + 3;
+        y = drawField(ML, y, CW, 'Instructions', instr, { multiline: true, boxH: 20 }) + 3;
+      }
+
+      // Met conditions
+      y = drawSectionBar(y, 'Meteorological Information') + 3;
+      const metRows = [1,2,3].map(n => [
+        v(tp,`met_date_${n}`), v(tp,`met_temp_${n}`), v(tp,`met_pressure_${n}`), v(tp,`met_wind_${n}`), v(tp,`met_cond_${n}`)
+      ]);
+      y = drawTable(y, ['Date','Temp (°C)','Pressure (hPa)','Wind (km/h)','Conditions'], metRows, [0.18,0.16,0.22,0.20,0.24]) + 3;
+
+      // Survey equipment
+      y = drawSectionBar(y, 'Survey Equipment') + 3;
+      const equipRows = [1,2,3].map(n => [v(tp,`equip_type_${n}`), v(tp,`equip_model_${n}`), v(tp,`equip_serial_${n}`)]);
+      y = drawTable(y, ['Type','Model','Serial No.'], equipRows, [0.30,0.40,0.30]) + 3;
+    }
+    stepsDone++;
+    updateProgress(stepsDone, totalSteps, 'Title page done');
+    await tick();
+
+    // ── PAGE(S): Traverse Notes ───────────────────────────────────────────────
+    const traversePages = Array.from(document.querySelectorAll('.form-page[data-page-type="traverse"]'));
+    for (let ti = 0; ti < traversePages.length; ti++) {
+      updateProgress(stepsDone, totalSteps, `Building Traverse page ${ti+1}…`);
+      await tick();
+      const tp = traversePages[ti];
+      addNewPage();
+      drawPageHeader('Vista Geomatics', 'Traverse Notes');
+      drawPageFooter(`Page ${pageNum}`);
+      let y = 20;
+
+      // Page title
+      pdf.setFillColor(...BGCELL);
+      pdf.rect(ML, y, CW, 10, 'F');
+      pdf.setFillColor(...MID);
+      pdf.rect(ML, y, 3, 10, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(12);
+      pdf.setTextColor(...DARK);
+      pdf.text('TRAVERSE NOTES AND POINT LIST', ML + 6, y + 7);
+      if (ti > 0) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        pdf.setTextColor(...MID);
+        pdf.text(`Sheet ${ti + 1}`, W - MR, y + 7, { align: 'right' });
+      }
+      y += 14;
+
+      // Setup
+      y = drawSectionBar(y, 'Set Up') + 3;
+      const isSuffix = ti === 0 ? '' : '_extra';
+      const instrName  = ti === 0 ? 'instrument'    : 'instrument_extra[]';
+      const setupName  = ti === 0 ? 'setup_point'   : 'setup_point_extra[]';
+      const bsName     = ti === 0 ? 'backsight_point': 'backsight_point_extra[]';
+      y = drawFieldGrid(y, [
+        { label: 'Instrument',       value: v(tp, instrName.replace('[]','')) || v(tp, 'instrument_extra') },
+        { label: 'Setup Point',      value: v(tp, setupName.replace('[]','')) || v(tp, 'setup_point_extra') },
+        { label: 'Backsight Point',  value: v(tp, bsName.replace('[]',''))    || v(tp, 'backsight_point_extra') },
+      ], 3) + 2;
+
+      // Point list
+      y = drawSectionBar(y, 'Point List for Conventional Survey') + 3;
+      const ptRows = [];
+      for (let r = 1; r <= 15; r++) {
+        const pno = ti === 0 ? v(tp,`pt_no_${r}`) : v(tp,`pt_no_extra_${r}`);
+        const pds = ti === 0 ? v(tp,`pt_desc_${r}`) : v(tp,`pt_desc_extra_${r}`);
+        ptRows.push([pno, pds]);
+      }
+      y = drawTable(y, ['Point No.', 'Description'], ptRows, [0.25, 0.75]);
       stepsDone++;
-      updateProgress(stepsDone, totalSteps, `Form page ${i + 1} done`);
+      updateProgress(stepsDone, totalSteps, `Traverse page ${ti+1} done`);
       await tick();
     }
 
-    // ---- PHOTO APPENDIX (4 per page, batched 4 at a time) ----
+    // ── PAGE(S): Evidence Reports ─────────────────────────────────────────────
+    const evidencePages = Array.from(document.querySelectorAll('.form-page[data-page-type="evidence"]'));
+    for (let ei = 0; ei < evidencePages.length; ei++) {
+      updateProgress(stepsDone, totalSteps, `Building Evidence page ${ei+1}…`);
+      await tick();
+      const ep = evidencePages[ei];
+      addNewPage();
+      drawPageHeader('Vista Geomatics', 'Evidence Report');
+      drawPageFooter(`Page ${pageNum}`);
+      let y = 20;
+
+      // Page title
+      pdf.setFillColor(...BGCELL);
+      pdf.rect(ML, y, CW, 10, 'F');
+      pdf.setFillColor(...MID);
+      pdf.rect(ML, y, 3, 10, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(12);
+      pdf.setTextColor(...DARK);
+      pdf.text('EVIDENCE REPORT', ML + 6, y + 7);
+      if (ei > 0) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        pdf.setTextColor(...MID);
+        pdf.text(`Entry ${ei + 1}`, W - MR, y + 7, { align: 'right' });
+      }
+      y += 14;
+
+      const suffix = ei === 0;
+      function ev(name) {
+        // Try direct name first, then [] variant
+        return v(ep, name) || v(ep, name + '[]') || v(ep, name + '_extra[]') || v(ep, name + '_extra');
+      }
+
+      // Evidence details
+      y = drawSectionBar(y, 'Evidence Details') + 3;
+      y = drawFieldGrid(y, [
+        { label: 'Date',         value: ev('evidence_date') },
+        { label: 'Point Number', value: ev('evidence_point_number') },
+      ], 2) + 1;
+      y = drawField(ML, y, CW, 'Location of Evidence', ev('evidence_location')) + 3;
+      y = drawField(ML, y, CW, 'Description of Evidence', ev('evidence_description'), { multiline: true, boxH: 18 }) + 3;
+      y = drawFieldGrid(y, [
+        { label: 'Condition',            value: ev('evidence_condition') },
+        { label: 'Colour / Age',         value: ev('evidence_colour_age') },
+        { label: 'Markings',             value: ev('evidence_markings') },
+      ], 3) + 2;
+      y = drawField(ML, y, CW, 'If Not Found – Extent of Search', ev('evidence_extent_search'), { multiline: true, boxH: 14 }) + 3;
+
+      // Proximities
+      y = drawSectionBar(y, 'Proximities from Pin') + 3;
+      const proxRows = [];
+      for (let r = 1; r <= 5; r++) {
+        const base = ei === 0 ? '' : '_extra_';
+        const dist = ei === 0 ? v(ep,`prox_dist_${r}`) : v(ep,`prox_dist_extra_${r}`);
+        const dir  = ei === 0 ? v(ep,`prox_dir_${r}`)  : v(ep,`prox_dir_extra_${r}`);
+        const obj  = ei === 0 ? v(ep,`prox_obj_${r}`)  : v(ep,`prox_obj_extra_${r}`);
+        proxRows.push([dist, dir, obj]);
+      }
+      y = drawTable(y, ['Distance (m)', 'Direction to Object', 'Object'], proxRows, [0.22, 0.28, 0.50]) + 4;
+
+      stepsDone++;
+      updateProgress(stepsDone, totalSteps, `Evidence page ${ei+1} done`);
+      await tick();
+    }
+
+    // ── PHOTO APPENDIX ────────────────────────────────────────────────────────
     if (photoImgs.length > 0) {
-      const margin  = 10;
-      const availW  = pdfWidth  - margin * 2;
-      const availH  = pdfHeight - margin * 2;
-      const cols = 2, rows = 2, perPage = cols * rows;
-      const cellW   = availW / cols;
-      const cellH   = availH / rows;
-      const captionH = 7;
+      updateProgress(stepsDone, totalSteps, 'Building Photo Appendix…');
+      await tick();
 
       const photos = photoImgs.map((img, idx) => {
-        const card    = img.closest('.photo-card');
-        const ta      = card ? card.querySelector('textarea') : null;
-        const desc    = (ta && ta.value.trim()) ? ta.value.trim() : `Photo ${idx + 1}`;
-        return { src: img.src, desc, iw: img.naturalWidth || img.width || 800, ih: img.naturalHeight || img.height || 600 };
+        const card = img.closest('.photo-card');
+        const ta   = card ? card.querySelector('textarea') : null;
+        const desc = (ta && ta.value.trim()) ? ta.value.trim() : `Photo ${idx + 1}`;
+        return { src: img.src, desc, iw: img.naturalWidth || 800, ih: img.naturalHeight || 600 };
       });
 
-      for (let i = 0; i < photos.length; i += perPage) {
-        const batch = photos.slice(i, i + perPage);
-        pdf.addPage();
-        pdf.setFontSize(11);
-        pdf.text('Evidence Photos', margin, margin - 2);
+      const PAD = 6, HDRH = 14, FOOTERH = 12;
+      const COLS = 2, ROWS = 2, PER = COLS * ROWS;
+      const GAP  = 4;
+      const CAPTH = 9;
+      const cellW = (CW - GAP) / COLS;
+      const availH = H - HDRH - FOOTERH - PAD * 2;
+      const cellH = (availH - GAP) / ROWS;
 
+      for (let i = 0; i < photos.length; i += PER) {
+        addNewPage();
+        drawPageHeader('Vista Geomatics', 'Photo Appendix');
+        drawPageFooter(`Page ${pageNum}  ·  Photos ${i+1}–${Math.min(i+PER, photos.length)} of ${photos.length}`);
+
+        // Appendix page title
+        let y = HDRH + PAD;
+        pdf.setFillColor(...BGCELL);
+        pdf.rect(ML, y, CW, 7, 'F');
+        pdf.setFillColor(...MID);
+        pdf.rect(ML, y, 3, 7, 'F');
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(9);
+        pdf.setTextColor(...DARK);
+        pdf.text('EVIDENCE PHOTO APPENDIX', ML + 6, y + 5);
+        y += 10;
+
+        const batch = photos.slice(i, i + PER);
         for (let j = 0; j < batch.length; j++) {
-          const p        = batch[j];
+          const p         = batch[j];
           const globalIdx = i + j;
-          updateProgress(stepsDone, totalSteps, `Adding photo ${globalIdx + 1} of ${photoImgs.length}…`);
+          updateProgress(stepsDone, totalSteps, `Photo ${globalIdx+1} of ${photos.length}…`);
           await tick();
 
-          const col  = j % cols;
-          const row  = Math.floor(j / cols);
-          const cellX = margin + col * cellW;
-          const cellY = margin + row * cellH;
+          const col  = j % COLS;
+          const row  = Math.floor(j / COLS);
+          const cx   = ML + col * (cellW + GAP);
+          const cy   = y + row * (cellH + GAP);
 
-          // Re-compress at PDF-appropriate size to avoid embedding huge data
-          const dataUrl = await new Promise(res => {
+          // Cell background + border
+          pdf.setFillColor(250, 252, 255);
+          pdf.setDrawColor(...RULED);
+          pdf.setLineWidth(0.3);
+          pdf.roundedRect(cx, cy, cellW, cellH, 2, 2, 'FD');
+
+          // Photo number badge
+          pdf.setFillColor(...DARK);
+          pdf.roundedRect(cx + 2, cy + 2, 10, 5.5, 1, 1, 'F');
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(6.5);
+          pdf.setTextColor(255,255,255);
+          pdf.text(`#${globalIdx+1}`, cx + 7, cy + 5.7, { align: 'center' });
+
+          // Image
+          const imgAvailW = cellW  - 4;
+          const imgAvailH = cellH  - CAPTH - 8;
+          const dataUrl   = await new Promise(res => {
             const tmp = new Image();
             tmp.onload = () => {
-              const maxSide = 900;
-              const sc = Math.max(tmp.naturalWidth, tmp.naturalHeight) > maxSide
-                ? maxSide / Math.max(tmp.naturalWidth, tmp.naturalHeight)
-                : 1;
-              const c = document.createElement('canvas');
+              const ms = 1400;
+              const sc = Math.max(tmp.naturalWidth, tmp.naturalHeight) > ms ? ms / Math.max(tmp.naturalWidth, tmp.naturalHeight) : 1;
+              const c  = document.createElement('canvas');
               c.width  = Math.round(tmp.naturalWidth  * sc);
               c.height = Math.round(tmp.naturalHeight * sc);
               c.getContext('2d').drawImage(tmp, 0, 0, c.width, c.height);
-              res(c.toDataURL('image/jpeg', 0.72));
+              res(c.toDataURL('image/jpeg', 0.85));
             };
             tmp.src = p.src;
           });
+          const sc    = Math.min(imgAvailW / p.iw, imgAvailH / p.ih);
+          const dw    = p.iw * sc, dh = p.ih * sc;
+          const imgX  = cx + (cellW - dw) / 2;
+          const imgY  = cy + 8;
+          pdf.addImage(dataUrl, 'JPEG', imgX, imgY, dw, dh);
 
-          const iw = p.iw, ih = p.ih;
-          const imgAvailH = cellH - captionH - 4;
-          const sc        = Math.min((cellW - 4) / iw, imgAvailH / ih);
-          const drawW     = iw * sc;
-          const drawH     = ih * sc;
-          const imgX      = cellX + (cellW - drawW) / 2;
-          const imgY      = cellY + 2;
-
-          pdf.addImage(dataUrl, 'JPEG', imgX, imgY, drawW, drawH);
-          pdf.setFontSize(8);
-          pdf.text(p.desc, cellX + 2, imgY + drawH + 4, { maxWidth: cellW - 4 });
+          // Caption box
+          const capY = cy + cellH - CAPTH - 1;
+          pdf.setFillColor(240, 245, 252);
+          pdf.rect(cx + 1, capY, cellW - 2, CAPTH, 'F');
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(7);
+          pdf.setTextColor(40, 60, 80);
+          const capLines = pdf.splitTextToSize(p.desc, cellW - 6);
+          pdf.text(capLines.slice(0,2), cx + 3, capY + 3.5);
 
           stepsDone++;
-          updateProgress(stepsDone, totalSteps, `Photo ${globalIdx + 1} of ${photoImgs.length} added`);
-          await tick();
         }
+        updateProgress(stepsDone, totalSteps, `Photo batch ${Math.floor(i/PER)+1} done`);
+        await tick();
       }
     }
 
