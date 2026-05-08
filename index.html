@@ -342,6 +342,130 @@
       .btn-row, .btn-row-controls, .save-badge { display: none !important; }
       input, textarea, select { box-shadow: none !important; }
     }
+
+    /* =====================
+       HEADER SUB-BAR (holds outdoor toggle)
+    ===================== */
+    .header-sub-bar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 7px 20px;
+      background: linear-gradient(90deg, var(--vista-blue-dark) 0%, var(--vista-blue) 100%);
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      gap: 10px;
+    }
+
+    /* =====================
+       OUTDOOR MODE TOGGLE BUTTON
+    ===================== */
+    #outdoorToggle {
+      border-radius: 999px;
+      padding: 6px 16px 6px 12px;
+      font-size: 0.80rem;
+      font-weight: 700;
+      font-family: "Inter", sans-serif;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      box-shadow: none;
+    }
+    #outdoorToggle:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.6);
+    }
+    #outdoorToggle .tog-icon { font-size: 1rem; line-height: 1; }
+
+    body.outdoor-mode #outdoorToggle {
+      background: #f5c400;
+      color: #000;
+      border-color: #c89e00;
+    }
+    body.outdoor-mode .header-sub-bar {
+      background: #111 !important;
+      border-bottom: 1px solid #333;
+    }
+
+    /* =====================
+       OUTDOOR MODE OVERRIDES
+    ===================== */
+    body.outdoor-mode {
+      background: #ffffff !important;
+    }
+    body.outdoor-mode .container {
+      background: #ffffff;
+      box-shadow: none;
+      border: 3px solid #000;
+      border-radius: 10px;
+    }
+    body.outdoor-mode .container::before { display: none; }
+    body.outdoor-mode .header-bar {
+      background: #000 !important;
+      padding: 16px 24px;
+    }
+    body.outdoor-mode .header-left h1 { font-size: 2rem; }
+    body.outdoor-mode .header-left p { font-size: 1.1rem; opacity: 1; font-weight: 600; }
+    body.outdoor-mode .page-title { font-size: 1.6rem; color: #000; margin: 12px 0 16px; }
+    body.outdoor-mode .section {
+      background: #fff !important;
+      border: 2.5px solid #000 !important;
+      box-shadow: none !important;
+      margin: 14px 0;
+    }
+    body.outdoor-mode .section::before { height: 5px; background: #000 !important; }
+    body.outdoor-mode .section-title { font-size: 1.15rem; color: #000; font-weight: 700; margin-bottom: 8px; }
+    body.outdoor-mode .section-subtext { font-size: 0.95rem; color: #333; margin-bottom: 10px; }
+    body.outdoor-mode label { font-size: 1rem; color: #000; font-weight: 700; margin-bottom: 5px; }
+    body.outdoor-mode input[type="text"],
+    body.outdoor-mode input[type="date"],
+    body.outdoor-mode textarea,
+    body.outdoor-mode select {
+      font-size: 1.05rem;
+      padding: 9px 10px;
+      border: 2.5px solid #000 !important;
+      background: #fff !important;
+      color: #000 !important;
+      border-radius: 6px;
+    }
+    body.outdoor-mode input:focus,
+    body.outdoor-mode textarea:focus,
+    body.outdoor-mode select:focus {
+      outline: 3px solid #f5c400 !important;
+      box-shadow: none !important;
+    }
+    body.outdoor-mode th { background: #000 !important; color: #fff !important; font-size: 0.95rem; }
+    body.outdoor-mode td { font-size: 0.95rem; color: #000; }
+    body.outdoor-mode th, body.outdoor-mode td { border: 1.5px solid #000 !important; padding: 7px 8px; }
+    body.outdoor-mode .table-note { font-size: 0.9rem; color: #444; }
+    body.outdoor-mode .btn-primary {
+      background: #000 !important; color: #fff !important;
+      font-size: 0.95rem; padding: 10px 20px; box-shadow: none;
+    }
+    body.outdoor-mode .btn-secondary {
+      background: #fff !important; color: #000 !important;
+      border: 2px solid #000 !important; font-size: 0.95rem; padding: 10px 20px;
+    }
+    body.outdoor-mode .btn-ghost {
+      background: #fff !important; color: #000 !important;
+      border: 2px dashed #000 !important; font-size: 0.95rem; padding: 10px 20px;
+    }
+    body.outdoor-mode .photo-card { border: 2px solid #000 !important; background: #fff !important; }
+    body.outdoor-mode .photo-card img { border: 1.5px solid #000 !important; }
+    body.outdoor-mode .photo-remove { border: 2px solid #000 !important; font-size: 0.88rem; font-weight: 700; }
+    body.outdoor-mode .save-badge { background: #000 !important; color: #fff !important; border: none !important; }
+    body.outdoor-mode .save-dot { background: #f5c400 !important; }
+    @media print {
+      #outdoorToggle { display: none !important; }
+      .header-sub-bar { display: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -353,6 +477,11 @@
         <p>Evidence Report</p>
       </div>
       <img src="vista-geomatics.png" class="header-logo" alt="Vista Geomatics Logo">
+    </div>
+    <div class="header-sub-bar">
+      <button id="outdoorToggle" type="button" title="Toggle outdoor / high-contrast mode">
+        <span class="tog-icon">☀️</span><span id="outdoorLabel">Outdoor</span>
+      </button>
     </div>
 
     <form id="evidenceForm" autocomplete="off">
@@ -459,6 +588,7 @@
             <button type="button" id="resetForm" class="btn-secondary">Reset Form</button>
             <button type="button" id="downloadPdf" class="btn-ghost">Download PDF</button>
             <button type="button" id="sharePdf" class="btn-ghost">Share PDF</button>
+            <button type="button" id="exportPhotosZip" class="btn-ghost">Export Photos ZIP</button>
           </div>
         </div>
       </div>
@@ -557,9 +687,76 @@
 
 <div class="save-badge" id="saveBadge"><span class="save-dot"></span><span id="saveBadgeText">Saved</span></div>
 
-<!-- jsPDF and html2canvas -->
+<!-- jsPDF, html2canvas, JSZip -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<style>
+  #pdfProgress {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(11, 48, 69, 0.72);
+    backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+  }
+  #pdfProgress.active { display: flex; }
+  .progress-box {
+    background: #fff;
+    border-radius: 18px;
+    padding: 28px 36px;
+    min-width: 300px;
+    max-width: 90vw;
+    box-shadow: 0 24px 60px rgba(5,41,66,0.35);
+    text-align: center;
+  }
+  .progress-title {
+    font-family: "Montserrat", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--vista-blue-dark);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .progress-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    min-height: 1.2em;
+  }
+  .progress-track {
+    width: 100%;
+    height: 10px;
+    background: #e4edf6;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--vista-blue-light), var(--vista-blue-dark));
+    border-radius: 999px;
+    transition: width 0.25s ease;
+  }
+  .progress-count {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+</style>
+
+<div id="pdfProgress">
+  <div class="progress-box">
+    <div class="progress-title" id="progressTitle">Generating PDF</div>
+    <div class="progress-sub" id="progressSub">Starting…</div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-count" id="progressCount"></div>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -888,7 +1085,7 @@
 
       const compressions = files
         .filter(f => f.type.startsWith('image/'))
-        .map(file => compressImage(file, 1400, 0.72));
+        .map(file => compressImage(file, 1200, 0.65));
 
       Promise.all(compressions).then(dataUrls => {
         dataUrls.forEach(dataUrl => makePhotoCard(photoGrid, dataUrl, ''));
@@ -1125,7 +1322,38 @@
   }
 
   /* =============================
-     PDF GENERATION
+     PROGRESS UI
+  ============================== */
+  const progressOverlay = document.getElementById('pdfProgress');
+  const progressTitle   = document.getElementById('progressTitle');
+  const progressSub     = document.getElementById('progressSub');
+  const progressFill    = document.getElementById('progressFill');
+  const progressCount   = document.getElementById('progressCount');
+
+  function showProgress(title) {
+    progressTitle.textContent = title || 'Generating PDF';
+    progressSub.textContent   = 'Starting…';
+    progressFill.style.width  = '0%';
+    progressCount.textContent = '';
+    progressOverlay.classList.add('active');
+  }
+
+  function updateProgress(done, total, label) {
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    progressFill.style.width  = pct + '%';
+    progressSub.textContent   = label || '';
+    progressCount.textContent = total > 0 ? `${done} / ${total}` : '';
+  }
+
+  function hideProgress() {
+    progressOverlay.classList.remove('active');
+  }
+
+  /* Yield to browser between heavy operations so the progress bar actually repaints */
+  function tick() { return new Promise(r => setTimeout(r, 0)); }
+
+  /* =============================
+     PDF GENERATION (batched)
   ============================== */
   async function generatePdfDoc() {
     const { jsPDF } = window.jspdf;
@@ -1134,169 +1362,284 @@
     const allPages = Array.from(document.querySelectorAll('.form-page'));
     const pdfWidth  = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
-    let isFirst = true;
 
-    // REPORT PAGES
+    // Collect photos before we start so we have an accurate total
+    const photoImgs = Array.from(document.querySelectorAll('.photo-grid img')).filter(img => img.src);
+    const totalSteps = allPages.length + photoImgs.length;
+    let stepsDone = 0;
+
+    // ---- REPORT FORM PAGES ----
     for (let i = 0; i < allPages.length; i++) {
+      updateProgress(stepsDone, totalSteps, `Rendering form page ${i + 1} of ${allPages.length}…`);
+      await tick();
+
       const clone = container.cloneNode(true);
       clone.style.position = 'absolute';
       clone.style.left = '-9999px';
       clone.style.top  = '0';
       document.body.appendChild(clone);
 
-      // Copy field values from real form to cloned form by (name, idx)
+      // Copy field values
       const origFields  = Array.from(container.querySelectorAll('input, textarea, select')).filter(el => el.type !== 'file');
       const cloneFields = Array.from(clone.querySelectorAll('input, textarea, select')).filter(el => el.type !== 'file');
-
-      // Build map name->list for original and clone, then copy matching index
-      const origMap = {};
-      const cloneMap = {};
-      origFields.forEach(el => (origMap[el.name] ||= []).push(el));
+      const origMap = {}, cloneMap = {};
+      origFields.forEach(el  => (origMap[el.name]  ||= []).push(el));
       cloneFields.forEach(el => (cloneMap[el.name] ||= []).push(el));
-
       Object.keys(origMap).forEach(name => {
-        const oList = origMap[name] || [];
-        const cList = cloneMap[name] || [];
+        const oList = origMap[name] || [], cList = cloneMap[name] || [];
         for (let k = 0; k < Math.min(oList.length, cList.length); k++) {
-          const o = oList[k];
-          const c = cList[k];
+          const o = oList[k], c = cList[k];
           if (!o || !c) continue;
           if (c.type === 'checkbox' || c.type === 'radio') c.checked = o.checked;
           else c.value = o.value;
         }
       });
 
-      // In the cloned container, show only this page index
-      const clonePages = clone.querySelectorAll('.form-page');
-      clonePages.forEach((page, idx) => {
+      // Show only this page
+      clone.querySelectorAll('.form-page').forEach((page, idx) => {
         page.style.display = (idx === i) ? 'block' : 'none';
       });
-
-      // Hide buttons/badge in clone
-      clone.querySelectorAll('.btn-row, .btn-row-controls, .save-badge').forEach(row => {
-        row.style.display = 'none';
+      clone.querySelectorAll('.btn-row, .btn-row-controls, .save-badge').forEach(el => {
+        el.style.display = 'none';
       });
 
-      const canvas = await html2canvas(clone, { scale: 2, useCORS: true });
-      const imgData = canvas.toDataURL('image/jpeg', 0.9);
-
-      let imgW = canvas.width;
-      let imgH = canvas.height;
-      const scale = Math.min(pdfWidth / imgW, pdfHeight / imgH);
-      imgW *= scale;
-      imgH *= scale;
-
-      const x = (pdfWidth - imgW) / 2;
-      const y = (pdfHeight - imgH) / 2;
-
-      if (!isFirst) pdf.addPage();
-      isFirst = false;
-      pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH);
-
+      const canvas = await html2canvas(clone, { scale: 2, useCORS: true, logging: false });
+      // Release clone immediately to free memory
       document.body.removeChild(clone);
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.88);
+      // Null the canvas reference so GC can collect it
+      canvas.width = canvas.height = 0;
+
+      let imgW = canvas.width || 1, imgH = canvas.height || 1;
+      // Re-read from imgData dimensions via a temp image
+      await new Promise(res => {
+        const tmp = new Image();
+        tmp.onload = () => {
+          imgW = tmp.width; imgH = tmp.height;
+          const sc = Math.min(pdfWidth / imgW, pdfHeight / imgH);
+          imgW *= sc; imgH *= sc;
+          const x = (pdfWidth  - imgW) / 2;
+          const y = (pdfHeight - imgH) / 2;
+          if (i > 0) pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH);
+          res();
+        };
+        tmp.src = imgData;
+      });
+
+      stepsDone++;
+      updateProgress(stepsDone, totalSteps, `Form page ${i + 1} done`);
+      await tick();
     }
 
-    // PHOTO APPENDIX (4 per page)
-    const photoImgs = Array.from(document.querySelectorAll('.photo-grid img')).filter(img => img.src);
+    // ---- PHOTO APPENDIX (4 per page, batched 4 at a time) ----
     if (photoImgs.length > 0) {
-      const margin    = 10;
-      const availW    = pdfWidth  - margin * 2;
-      const availH    = pdfHeight - margin * 2;
+      const margin  = 10;
+      const availW  = pdfWidth  - margin * 2;
+      const availH  = pdfHeight - margin * 2;
+      const cols = 2, rows = 2, perPage = cols * rows;
+      const cellW   = availW / cols;
+      const cellH   = availH / rows;
+      const captionH = 7;
 
       const photos = photoImgs.map((img, idx) => {
-        const card = img.closest('.photo-card');
-        const textarea = card ? card.querySelector('textarea') : null;
-        const desc = (textarea && textarea.value.trim()) ? textarea.value.trim() : `Photo ${idx + 1}`;
-        return { img, desc };
+        const card    = img.closest('.photo-card');
+        const ta      = card ? card.querySelector('textarea') : null;
+        const desc    = (ta && ta.value.trim()) ? ta.value.trim() : `Photo ${idx + 1}`;
+        return { src: img.src, desc, iw: img.naturalWidth || img.width || 800, ih: img.naturalHeight || img.height || 600 };
       });
 
-      const perPage = 4;
-      const cols = 2, rows = 2;
-      const cellW = availW / cols;
-      const cellH = availH / rows;
-      const captionH = 6;
-
       for (let i = 0; i < photos.length; i += perPage) {
-        const pagePhotos = photos.slice(i, i + perPage);
+        const batch = photos.slice(i, i + perPage);
         pdf.addPage();
-
-        pdf.setFontSize(12);
+        pdf.setFontSize(11);
         pdf.text('Evidence Photos', margin, margin - 2);
 
-        pagePhotos.forEach((p, idxOnPage) => {
-          const col = idxOnPage % cols;
-          const row = Math.floor(idxOnPage / cols);
+        for (let j = 0; j < batch.length; j++) {
+          const p        = batch[j];
+          const globalIdx = i + j;
+          updateProgress(stepsDone, totalSteps, `Adding photo ${globalIdx + 1} of ${photoImgs.length}…`);
+          await tick();
 
+          const col  = j % cols;
+          const row  = Math.floor(j / cols);
           const cellX = margin + col * cellW;
           const cellY = margin + row * cellH;
 
-          const dataUrl = getScaledImageDataURL(p.img, 1400, 0.75);
+          // Re-compress at PDF-appropriate size to avoid embedding huge data
+          const dataUrl = await new Promise(res => {
+            const tmp = new Image();
+            tmp.onload = () => {
+              const maxSide = 900;
+              const sc = Math.max(tmp.naturalWidth, tmp.naturalHeight) > maxSide
+                ? maxSide / Math.max(tmp.naturalWidth, tmp.naturalHeight)
+                : 1;
+              const c = document.createElement('canvas');
+              c.width  = Math.round(tmp.naturalWidth  * sc);
+              c.height = Math.round(tmp.naturalHeight * sc);
+              c.getContext('2d').drawImage(tmp, 0, 0, c.width, c.height);
+              res(c.toDataURL('image/jpeg', 0.72));
+            };
+            tmp.src = p.src;
+          });
 
-          const iw = p.img.naturalWidth || p.img.width || 800;
-          const ih = p.img.naturalHeight || p.img.height || 600;
-
-          const imgAvailH = cellH - captionH - 2;
-          const sc = Math.min((cellW - 4) / iw, imgAvailH / ih);
-          const drawW = iw * sc;
-          const drawH = ih * sc;
-
-          const imgX = cellX + (cellW - drawW) / 2;
-          const imgY = cellY + 2;
+          const iw = p.iw, ih = p.ih;
+          const imgAvailH = cellH - captionH - 4;
+          const sc        = Math.min((cellW - 4) / iw, imgAvailH / ih);
+          const drawW     = iw * sc;
+          const drawH     = ih * sc;
+          const imgX      = cellX + (cellW - drawW) / 2;
+          const imgY      = cellY + 2;
 
           pdf.addImage(dataUrl, 'JPEG', imgX, imgY, drawW, drawH);
+          pdf.setFontSize(8);
+          pdf.text(p.desc, cellX + 2, imgY + drawH + 4, { maxWidth: cellW - 4 });
 
-          pdf.setFontSize(9);
-          const captionY = imgY + drawH + 3;
-          const captionX = cellX + 2;
-          pdf.text(p.desc, captionX, captionY, { maxWidth: cellW - 4 });
-        });
+          stepsDone++;
+          updateProgress(stepsDone, totalSteps, `Photo ${globalIdx + 1} of ${photoImgs.length} added`);
+          await tick();
+        }
       }
     }
 
+    updateProgress(totalSteps, totalSteps, 'Finalising…');
+    await tick();
     return pdf;
   }
 
   async function handlePdfAction(action) {
+    showProgress(action === 'share' ? 'Preparing PDF to Share' : 'Generating PDF');
     try {
-      saveNow(); // make sure latest is saved before export
+      saveNow();
       const pdf = await generatePdfDoc();
       const filename = buildDefaultPdfName();
 
       if (action === 'download') {
         pdf.save(filename);
+        hideProgress();
         return;
       }
 
       // SHARE
       const arrayBuf = pdf.output('arraybuffer');
-      const blob = new Blob([arrayBuf], { type: 'application/pdf' });
-
-      const file = new File([blob], filename, { type: 'application/pdf' });
+      const blob     = new Blob([arrayBuf], { type: 'application/pdf' });
+      const file     = new File([blob], filename, { type: 'application/pdf' });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'Evidence Report',
-          text: 'Vista Geomatics Evidence Report'
-        });
+        await navigator.share({ files: [file], title: 'Evidence Report', text: 'Vista Geomatics Evidence Report' });
       } else if (navigator.share) {
         const blobUrl = URL.createObjectURL(blob);
-        try {
-          await navigator.share({ title: 'Evidence Report', text: 'Evidence Report PDF', url: blobUrl });
-        } finally {
-          URL.revokeObjectURL(blobUrl);
-        }
+        try { await navigator.share({ title: 'Evidence Report', text: 'Evidence Report PDF', url: blobUrl }); }
+        finally { URL.revokeObjectURL(blobUrl); }
       } else {
         pdf.save(filename);
       }
     } catch (err) {
       console.error('PDF generation/share error:', err);
       alert('There was a problem generating the PDF. Please try again.');
+    } finally {
+      hideProgress();
     }
   }
 
   if (downloadBtn) downloadBtn.addEventListener('click', () => handlePdfAction('download'));
-  if (shareBtn) shareBtn.addEventListener('click', () => handlePdfAction('share'));
+  if (shareBtn)    shareBtn.addEventListener('click',    () => handlePdfAction('share'));
+
+  /* =============================
+     PHOTOS ZIP EXPORT (fallback)
+  ============================== */
+  const zipBtn = document.getElementById('exportPhotosZip');
+  if (zipBtn) {
+    zipBtn.addEventListener('click', async () => {
+      const photoImgs = Array.from(document.querySelectorAll('.photo-grid img')).filter(img => img.src);
+      if (photoImgs.length === 0) {
+        alert('No photos to export. Add photos to an Evidence page first.');
+        return;
+      }
+
+      showProgress('Exporting Photos ZIP');
+      updateProgress(0, photoImgs.length, 'Building ZIP…');
+
+      try {
+        const zip     = new JSZip();
+        const folder  = zip.folder('evidence_photos');
+        const jobNo   = (form.querySelector('[name="job_no"]')?.value || 'job').replace(/\s+/g,'_');
+
+        for (let i = 0; i < photoImgs.length; i++) {
+          const img  = photoImgs[i];
+          const card = img.closest('.photo-card');
+          const ta   = card ? card.querySelector('textarea') : null;
+          const desc = (ta && ta.value.trim())
+            ? ta.value.trim().replace(/[^a-zA-Z0-9_\-\s]/g,'').trim().replace(/\s+/g,'_').slice(0,40)
+            : '';
+          const name  = `${String(i + 1).padStart(3,'0')}${desc ? '_' + desc : ''}.jpg`;
+
+          // Strip the data:image/...;base64, prefix
+          const base64 = img.src.split(',')[1];
+          if (base64) folder.file(name, base64, { base64: true });
+
+          updateProgress(i + 1, photoImgs.length, `Adding photo ${i + 1} of ${photoImgs.length}…`);
+          await tick();
+        }
+
+        // Add a plain-text caption sheet
+        const lines = photoImgs.map((img, i) => {
+          const card = img.closest('.photo-card');
+          const ta   = card ? card.querySelector('textarea') : null;
+          return `Photo ${i + 1}: ${(ta && ta.value.trim()) ? ta.value.trim() : '(no caption)'}`;
+        });
+        folder.file('captions.txt', lines.join('\n'));
+
+        updateProgress(photoImgs.length, photoImgs.length, 'Compressing ZIP…');
+        await tick();
+
+        const blob     = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 3 } });
+        const zipName  = `${jobNo}_photos_${getTodayISO()}.zip`;
+        const url      = URL.createObjectURL(blob);
+        const a        = document.createElement('a');
+        a.href         = url;
+        a.download     = zipName;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(url); document.body.removeChild(a); }, 2000);
+
+      } catch (err) {
+        console.error('ZIP export error:', err);
+        alert('There was a problem creating the ZIP. Please try again.');
+      } finally {
+        hideProgress();
+      }
+    });
+  }
+
+  /* =============================
+     OUTDOOR MODE TOGGLE
+  ============================== */
+  (function () {
+    const btn   = document.getElementById('outdoorToggle');
+    const label = document.getElementById('outdoorLabel');
+    const KEY   = 'vista_outdoor_mode';
+
+    function setMode(on) {
+      if (on) {
+        document.body.classList.add('outdoor-mode');
+        label.textContent = 'Normal';
+        localStorage.setItem(KEY, '1');
+      } else {
+        document.body.classList.remove('outdoor-mode');
+        label.textContent = 'Outdoor';
+        localStorage.removeItem(KEY);
+      }
+    }
+
+    // Restore preference on load
+    if (localStorage.getItem(KEY) === '1') setMode(true);
+
+    btn.addEventListener('click', function () {
+      setMode(!document.body.classList.contains('outdoor-mode'));
+    });
+  })();
 
 })();
 </script>
